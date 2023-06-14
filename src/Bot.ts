@@ -40,25 +40,17 @@ export class Bot {
     console.log('GUEST token', token, 'userId', userId);
     this.userId = userId;
 
-    this.port = await this.client.connect(POSBUS_URL, token, userId);
+    await this.client.connect(POSBUS_URL, token, userId);
 
     this.client.teleport(this.config.worldId);
   }
 
   moveUser(transform: TransformNoScale) {
     console.log('moveUser', transform);
-    this._getPort().postMessage([MsgType.MY_TRANSFORM, transform]);
+    this.client.send(MsgType.MY_TRANSFORM, transform);
   }
 
   sendHighFive(userId: string, message?: string) {
-    // this._getPort().postMessage([
-    //   MsgType.HIGH_FIVE,
-    //   {
-    //     sender_id: this.userId!,
-    //     receiver_id: userId,
-    //     message: message || '',
-    //   },
-    // ]);
     this.client.send(MsgType.HIGH_FIVE, {
       sender_id: this.userId!,
       receiver_id: userId,
@@ -221,12 +213,5 @@ export class Bot {
 
   private config: BotConfig;
   private client: PBClient;
-  private port: PosbusPort | undefined;
   private userId: string | undefined;
-  private _getPort() {
-    if (!this.port) {
-      throw new Error('not connected');
-    }
-    return this.port;
-  }
 }
