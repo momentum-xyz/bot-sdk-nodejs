@@ -1,0 +1,12 @@
+{
+  "extends": "../tsconfig",
+  "include": ["**/*.ts"],
+  "compilerOptions": {
+    "outDir": "../dist",
+    "rootDir": ".",
+    "declaration": true,
+    "declarationDir": "../dist",
+    "declarationMap": true,
+    "emitDeclarationOnly": false
+  }
+}
