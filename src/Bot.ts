@@ -11,10 +11,8 @@ import {
 import fs from 'fs';
 import type { BotConfig } from './types';
 
-// import wasm from '@momentum-xyz/posbus-client/pbc.wasm';
-const wasmPBC = fs.readFileSync(
-  './node_modules/@momentum-xyz/posbus-client/dist/pbc.wasm'
-);
+const wasmURL = require.resolve('@momentum-xyz/posbus-client/pbc.wasm');
+const wasmPBC = fs.readFileSync(wasmURL);
 
 type TransformNoScale = posbus.TransformNoScale;
 // type Transform = posbus.Transform;
