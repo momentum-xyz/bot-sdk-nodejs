@@ -1,0 +1,12 @@
+{
+  "extends": "@tsconfig/node20/tsconfig.json",
+  "include": ["*.ts", "../dist/*.ts"],
+  "compilerOptions": {
+    "noEmit": true,
+    "rootDir": "..",
+    "moduleResolution": "nodenext",
+    "paths": {
+      "@momentum-xyz/bot-sdk": ["../dist"]
+    }
+  }
+}
