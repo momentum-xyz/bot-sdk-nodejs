@@ -19,7 +19,8 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "clean": "rimraf dist",
-    "build": "npm run clean && tsc --build --listEmittedFiles",
+    "copy-files": "copyfiles -u 1 src/*.d.ts dist/",
+    "build": "npm run clean && npm run copy-files && tsc --build --listEmittedFiles",
     "start": "tsc --build -w --listEmittedFiles"
   },
   "author": "",
@@ -28,6 +29,7 @@
     "@tsconfig/node-lts-strictest-esm": "^18.12.1",
     "@tsconfig/node20": "^1.0.1",
     "@types/node": "^20.2.5",
+    "copyfiles": "^2.4.1",
     "rimraf": "^5.0.1",
     "typescript": "^5.1.3"
   },
