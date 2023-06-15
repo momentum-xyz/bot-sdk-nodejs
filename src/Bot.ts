@@ -43,10 +43,23 @@ export class Bot {
 
     this.client.teleport(this.config.worldId);
   }
+  get isConnected() {
+    return this._isConnected;
+  }
+  get IsReady() {
+    return this._isReady;
+  }
 
   moveUser(transform: TransformNoScale) {
     console.log('moveUser', transform);
     this.client.send([MsgType.MY_TRANSFORM, transform]);
+  }
+
+  transformObject(objectId: string, object_transform: posbus.Transform) {
+    this.client.send([
+      MsgType.OBJECT_TRANSFORM,
+      { id: objectId, object_transform },
+    ]);
   }
 
   sendHighFive(userId: string, message?: string) {
@@ -86,8 +99,11 @@ export class Bot {
       case MsgType.SIGNAL: {
         const { value } = data;
         if (value === 7) {
+          this._isConnected = true;
           onConnected?.(this.userId!);
-        } else if (value === 8) {
+        } else {
+          // Disconnected, dual-connect, world doesn't exist, etc
+          this._isConnected = false;
           onDisconnected?.();
         }
         break;
@@ -148,6 +164,7 @@ export class Bot {
         break;
       }
       case MsgType.SET_WORLD: {
+        this._isReady = true;
         onJoinedWorld?.(data);
         break;
       }
@@ -216,4 +233,6 @@ export class Bot {
   private config: BotConfig;
   private client: PBClient;
   private userId: string | undefined;
+  private _isConnected: boolean = false;
+  private _isReady: boolean = false;
 }
