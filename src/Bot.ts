@@ -5,7 +5,6 @@ import {
   posbus,
   PBClient,
   PosbusEvent,
-  PosbusPort,
   MsgType,
 } from '@momentum-xyz/posbus-client';
 import fs from 'fs';
@@ -47,15 +46,18 @@ export class Bot {
 
   moveUser(transform: TransformNoScale) {
     console.log('moveUser', transform);
-    this.client.send(MsgType.MY_TRANSFORM, transform);
+    this.client.send([MsgType.MY_TRANSFORM, transform]);
   }
 
   sendHighFive(userId: string, message?: string) {
-    this.client.send(MsgType.HIGH_FIVE, {
-      sender_id: this.userId!,
-      receiver_id: userId,
-      message: message || '',
-    });
+    this.client.send([
+      MsgType.HIGH_FIVE,
+      {
+        sender_id: this.userId!,
+        receiver_id: userId,
+        message: message || '',
+      },
+    ]);
   }
 
   // ----- PRIVATE -----

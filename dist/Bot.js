@@ -31,27 +31,22 @@ class Bot {
         console.log('guest-token resp', resp);
         console.log('GUEST token', token, 'userId', userId);
         this.userId = userId;
-        this.port = await this.client.connect(POSBUS_URL, token, userId);
+        await this.client.connect(POSBUS_URL, token, userId);
         this.client.teleport(this.config.worldId);
     }
     moveUser(transform) {
         console.log('moveUser', transform);
-        this._getPort().postMessage([posbus_client_1.MsgType.MY_TRANSFORM, transform]);
+        this.client.send([posbus_client_1.MsgType.MY_TRANSFORM, transform]);
     }
     sendHighFive(userId, message) {
-        // this._getPort().postMessage([
-        //   MsgType.HIGH_FIVE,
-        //   {
-        //     sender_id: this.userId!,
-        //     receiver_id: userId,
-        //     message: message || '',
-        //   },
-        // ]);
-        this.client.send(posbus_client_1.MsgType.HIGH_FIVE, {
-            sender_id: this.userId,
-            receiver_id: userId,
-            message: message || '',
-        });
+        this.client.send([
+            posbus_client_1.MsgType.HIGH_FIVE,
+            {
+                sender_id: this.userId,
+                receiver_id: userId,
+                message: message || '',
+            },
+        ]);
     }
     // ----- PRIVATE -----
     handleMessage = (event) => {
@@ -180,13 +175,6 @@ class Bot {
     };
     config;
     client;
-    port;
     userId;
-    _getPort() {
-        if (!this.port) {
-            throw new Error('not connected');
-        }
-        return this.port;
-    }
 }
 exports.Bot = Bot;

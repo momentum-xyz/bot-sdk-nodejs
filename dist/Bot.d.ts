@@ -11,9 +11,7 @@ export declare class Bot {
     private handleMessage;
     private config;
     private client;
-    private port;
     private userId;
-    private _getPort;
 }
 export {};
 //# sourceMappingURL=Bot.d.ts.map
