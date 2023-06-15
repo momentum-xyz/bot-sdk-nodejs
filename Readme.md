@@ -7,7 +7,7 @@ This SDK allows connecting to the Odyssey platform as a user an interact with it
 ## Installation
 
 ```bash
-// TODO
+npm install https://github.com/momentum-xyz/bot-sdk-nodejs
 ```
 
 ## Typescript Example
