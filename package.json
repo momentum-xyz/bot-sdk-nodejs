@@ -1,6 +1,6 @@
 {
   "name": "@momentum-xyz/bot-sdk",
-  "version": "0.0.1",
+  "version": "0.0.0-alpha.0",
   "description": "Bot SDK for Odyssey platform",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -13,7 +13,8 @@
     }
   },
   "files": [
-    "dist/",
+    "dist/*.ts",
+    "!dist/src",
     "!*.tsbuildinfo"
   ],
   "scripts": {
@@ -25,6 +26,16 @@
   },
   "author": "",
   "license": "GPL-3.0",
+  "bugs": {
+    "url": "https://github.com/momentum-xyz/bot-sdk-nodejs/issues"
+  },
+  "homepage": "https://github.com/momentum-xyz/bot-sdk-nodejs#readme",
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com"
+  },
+  "engines": {
+    "node": ">=20"
+  },
   "devDependencies": {
     "@tsconfig/node-lts-strictest-esm": "^18.12.1",
     "@types/node": "^20.2.5",
