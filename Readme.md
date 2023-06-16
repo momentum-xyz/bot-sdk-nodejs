@@ -14,8 +14,10 @@ Read the Github documentation, create PAT and:
 npm login --scope=@momentum-xyz --auth-type=legacy --registry=https://npm.pkg.github.com
 ```
 
+It's still in alpha so you need to specify the 'next' dist-tag:
+
 ```bash
-npm install @momentum-xyz/bot-sdk
+npm install @momentum-xyz/bot-sdk@next
 ```
 
 ## Typescript Example
@@ -50,4 +52,36 @@ const bot = new Bot({
 });
 
 bot.connect();
+```
+
+## Development
+
+Close the repo and install dependencies:
+
+```
+git clone git@github.com:momentum-xyz/bot-sdk-nodejs.git
+
+cd bot-sdk-nodejs
+
+npm install
+```
+
+To build once do:
+
+```bash
+npm run build
+```
+
+And to watch for changes:
+
+```bash
+npm start
+```
+
+To deploy a new version:
+
+```bash
+npm version prerelease
+
+git push origin main --tags
 ```
