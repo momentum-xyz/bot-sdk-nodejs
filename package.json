@@ -27,7 +27,6 @@
   "license": "GPL-3.0",
   "devDependencies": {
     "@tsconfig/node-lts-strictest-esm": "^18.12.1",
-    "@tsconfig/node20": "^1.0.1",
     "@types/node": "^20.2.5",
     "copyfiles": "^2.4.1",
     "rimraf": "^5.0.1",
