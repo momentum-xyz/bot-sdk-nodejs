@@ -13,8 +13,7 @@
     }
   },
   "files": [
-    "dist/*.ts",
-    "!dist/src",
+    "dist/*.{js,d.ts,ts.map}",
     "!*.tsbuildinfo"
   ],
   "scripts": {
