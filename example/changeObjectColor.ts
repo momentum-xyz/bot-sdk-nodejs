@@ -2,23 +2,11 @@
 import { Bot, getAuthTokenWithPrivateKey, posbus } from '../';
 import type { BotConfig } from '../dist/types';
 
-let myUserId: string | null = null;
-let myUserTransform: posbus.TransformNoScale | null = null;
 let objectId: string | null = null;
 let objectTransform: posbus.Transform | null = null;
 
 const config: BotConfig = {
   worldId: '00000000-0000-8000-8000-000000000005',
-  onConnected: (userId) => {
-    console.log('Connected!');
-    myUserId = userId;
-  },
-  onUserAdded: (user) => {
-    console.log('User added!', user);
-    if (user.id === myUserId) {
-      myUserTransform = user.transform;
-    }
-  },
 
   onObjectAdded: (object) => {
     console.log('Object added!', object);
