@@ -51,7 +51,28 @@ const bot = new Bot({
   // ...
 });
 
+// connect as Guest
 bot.connect();
+```
+
+### Connect as User with Ethereum account private key
+
+```js
+import { Bot, getAuthTokenWithPrivateKey, posbus } from '@momentum-xyz/bot-sdk';
+
+// instantiate Bot - same as above example
+
+const privateKey = process.env.PRIVATE_KEY;
+
+getAuthTokenWithPrivateKey(privateKey)
+  .then((token) => {
+    console.log('Connect with auth token...', token);
+    bot.connect(token);
+  })
+  .catch((err) => {
+    console.error('Failed to get auth token', err);
+    process.exit(1);
+  });
 ```
 
 ## Development

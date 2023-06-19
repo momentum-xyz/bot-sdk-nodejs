@@ -28,18 +28,34 @@ export class Bot {
     this.client = new PBClient(this.handleMessage);
   }
 
-  async connect() {
+  async connect(authToken?: string) {
     this.client.load(wasmPBC);
 
-    const resp = await fetch(`${BACKEND_URL}/api/v4/auth/guest-token`, {
-      method: 'POST',
-    }).then((resp) => resp.json());
-    const { token, id: userId } = resp;
-    console.log('guest-token resp', resp);
-    console.log('GUEST token', token, 'userId', userId);
-    this.userId = userId;
+    if (authToken) {
+      this.authToken = authToken;
 
-    await this.client.connect(POSBUS_URL, token, userId);
+      const user = await fetch(`${BACKEND_URL}/api/v4/users/me`, {
+        headers: {
+          Authorization: `Bearer ${authToken}`,
+        },
+      }).then((resp) => resp.json());
+      console.log('Users/me:', user);
+      this.userId = user.id;
+    } else {
+      const resp = await fetch(`${BACKEND_URL}/api/v4/auth/guest-token`, {
+        method: 'POST',
+      }).then((resp) => resp.json());
+      const { token, id: userId } = resp;
+      console.log('GUEST token', token, 'userId', userId);
+      this.authToken = token;
+      this.userId = userId;
+    }
+
+    if (!this.authToken || !this.userId) {
+      throw new Error('authToken or userId is not set');
+    }
+
+    await this.client.connect(POSBUS_URL, this.authToken, this.userId);
 
     this.client.teleport(this.config.worldId);
   }
@@ -233,6 +249,7 @@ export class Bot {
   private config: BotConfig;
   private client: PBClient;
   private userId: string | undefined;
+  private authToken: string | undefined;
   private _isConnected: boolean = false;
   private _isReady: boolean = false;
 }

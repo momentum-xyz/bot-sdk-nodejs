@@ -1,8 +1,6 @@
 // import { Bot, posbus } from '@momentum-xyz/bot-sdk';
-import { Bot, posbus } from '../';
+import { Bot, getAuthTokenWithPrivateKey, posbus } from '../';
 import type { BotConfig } from '../dist/types';
-
-console.log('BOT SDK:', Bot);
 
 let myUserId: string | null = null;
 let myUserTransform: posbus.TransformNoScale | null = null;
@@ -48,10 +46,22 @@ const config: BotConfig = {
 
 const bot = new Bot(config);
 
-console.log('Waiting few seconds before connect...');
-setTimeout(() => {
+const privateKey = process.argv[2];
+if (privateKey) {
+  console.log('Private key passed. Get the auth token...');
+  getAuthTokenWithPrivateKey(privateKey)
+    .then((token) => {
+      console.log('Connect with auth token...', token);
+      bot.connect(token);
+    })
+    .catch((err) => {
+      console.error('Failed to get auth token', err);
+      process.exit(1);
+    });
+} else {
+  console.log('No private key passed. Connect as guest...');
   bot.connect();
-}, 2000);
+}
 
 setInterval(() => {
   if (!bot.IsReady || !myUserTransform) return;

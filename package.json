@@ -44,6 +44,7 @@
   },
   "dependencies": {
     "@momentum-xyz/posbus-client": "^0.0.1-beta.5",
+    "ethers": "^6.6.0",
     "websocket-polyfill": "^0.0.3"
   }
 }

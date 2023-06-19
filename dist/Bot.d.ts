@@ -5,7 +5,7 @@ import type { BotConfig } from './types';
 type TransformNoScale = posbus.TransformNoScale;
 export declare class Bot {
     constructor(config: BotConfig);
-    connect(): Promise<void>;
+    connect(authToken?: string): Promise<void>;
     get isConnected(): boolean;
     get IsReady(): boolean;
     moveUser(transform: TransformNoScale): void;
@@ -15,6 +15,7 @@ export declare class Bot {
     private config;
     private client;
     private userId;
+    private authToken;
     private _isConnected;
     private _isReady;
 }
