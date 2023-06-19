@@ -19,6 +19,9 @@ type TransformNoScale = posbus.TransformNoScale;
 const { BACKEND_URL = 'https://dev.odyssey.ninja' } = process.env;
 const POSBUS_URL = `${BACKEND_URL}/posbus`;
 
+// TODO move to core or sdk
+const CORE_PLUGIN_ID = 'f0f0f0f0-0f0f-4ff0-af0f-f0f0f0f0f0f0';
+
 export class Bot {
   constructor(config: BotConfig) {
     this.config = config;
@@ -87,6 +90,43 @@ export class Bot {
         message: message || '',
       },
     ]);
+  }
+
+  async setObjectAttribute({
+    name,
+    value,
+    objectId,
+    pluginId,
+  }: {
+    name: string;
+    value: any;
+    // path?: string; // TODO for sub-attributes
+    objectId: string;
+    pluginId?: string;
+  }) {
+    const resp = await fetch(
+      `${BACKEND_URL}/api/v4/objects/${objectId}/attributes`,
+      {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${this.authToken}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          object_id: objectId,
+          plugin_id: pluginId || CORE_PLUGIN_ID,
+          attribute_name: name,
+          attribute_value: value,
+        }),
+      }
+    ).then((resp) => resp.json());
+    console.log('setObjectAttribute resp', resp);
+
+    // TODO handle error
+    // if (resp.error) {
+    //   throw new Error(resp.error);
+    // }
+    return resp;
   }
 
   // ----- PRIVATE -----

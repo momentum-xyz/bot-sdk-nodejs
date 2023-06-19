@@ -11,6 +11,12 @@ export declare class Bot {
     moveUser(transform: TransformNoScale): void;
     transformObject(objectId: string, object_transform: posbus.Transform): void;
     sendHighFive(userId: string, message?: string): void;
+    setObjectAttribute({ name, value, objectId, pluginId, }: {
+        name: string;
+        value: any;
+        objectId: string;
+        pluginId?: string;
+    }): Promise<any>;
     private handleMessage;
     private config;
     private client;
