@@ -1,6 +1,6 @@
 // import { Bot, posbus } from '@momentum-xyz/bot-sdk';
 import { Bot, posbus } from '../';
-import { BotConfig } from '../dist/types';
+import type { BotConfig } from '../dist/types';
 
 console.log('BOT SDK:', Bot);
 
