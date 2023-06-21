@@ -25,7 +25,9 @@ class Bot {
         this.client = new posbus_client_1.PBClient(this.handleMessage);
     }
     async connect(authToken) {
-        this.client.load(wasmPBC);
+        console.log('Loading wasm (', wasmPBC.byteLength, ') bytes');
+        await this.client.load(wasmPBC);
+        console.log('Wasm loaded');
         if (authToken) {
             this.authToken = authToken;
             const user = await fetch(`${BACKEND_URL}/api/v4/users/me`, {
@@ -48,7 +50,9 @@ class Bot {
         if (!this.authToken || !this.userId) {
             throw new Error('authToken or userId is not set');
         }
+        console.log('About to start connecting to', POSBUS_URL);
         await this.client.connect(POSBUS_URL, this.authToken, this.userId);
+        console.log('Teleport to world', this.config.worldId);
         this.client.teleport(this.config.worldId);
     }
     get isConnected() {
@@ -117,6 +121,9 @@ class Bot {
                 else {
                     // Disconnected, dual-connect, world doesn't exist, etc
                     this._isConnected = false;
+                    if (value === 1) {
+                        console.log('PosBus SIGNAL 1, dual-connect with same account!');
+                    }
                     onDisconnected?.();
                 }
                 break;

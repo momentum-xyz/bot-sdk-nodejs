@@ -32,7 +32,9 @@ export class Bot {
   }
 
   async connect(authToken?: string) {
-    this.client.load(wasmPBC);
+    console.log('Loading wasm (', wasmPBC.byteLength, ') bytes');
+    await this.client.load(wasmPBC);
+    console.log('Wasm loaded');
 
     if (authToken) {
       this.authToken = authToken;
@@ -58,8 +60,10 @@ export class Bot {
       throw new Error('authToken or userId is not set');
     }
 
+    console.log('About to start connecting to', POSBUS_URL);
     await this.client.connect(POSBUS_URL, this.authToken, this.userId);
 
+    console.log('Teleport to world', this.config.worldId);
     this.client.teleport(this.config.worldId);
   }
   get isConnected() {
@@ -160,6 +164,9 @@ export class Bot {
         } else {
           // Disconnected, dual-connect, world doesn't exist, etc
           this._isConnected = false;
+          if (value === 1) {
+            console.log('PosBus SIGNAL 1, dual-connect with same account!');
+          }
           onDisconnected?.();
         }
         break;
