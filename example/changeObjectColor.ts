@@ -5,12 +5,14 @@ import type { BotConfig } from '../dist/types';
 let objectId: string | null = null;
 let objectTransform: posbus.Transform | null = null;
 
+const objectName = 'CubeX3';
+
 const config: BotConfig = {
   worldId: '00000000-0000-8000-8000-000000000005',
 
   onObjectAdded: (object) => {
     console.log('Object added!', object);
-    if (object.name === 'CubeX') {
+    if (object.name === objectName) {
       objectId = object.id;
       objectTransform = object.transform;
     }
@@ -19,7 +21,7 @@ const config: BotConfig = {
 
 const bot = new Bot(config);
 
-const privateKey = process.argv[2];
+const privateKey = process.env['BOT_SDK_PRIVATE_KEY'];
 if (privateKey) {
   console.log('Private key passed. Get the auth token...');
   getAuthTokenWithPrivateKey(privateKey)
@@ -57,6 +59,19 @@ setInterval(() => {
       })
       .catch((err) => {
         console.error('Failed to set object attribute', err);
+      });
+  } else {
+    console.log('Spawn object...');
+    bot
+      .spawnObject({
+        name: objectName,
+        asset_3d_id: '5b5bd872-0328-e38c-1b54-bf2bfa70fc85', // Cube asset
+      })
+      .then(({ object_id }) => {
+        objectId = object_id;
+      })
+      .catch((err) => {
+        console.error('Failed to spawn object', err);
       });
   }
 }, 3000);
