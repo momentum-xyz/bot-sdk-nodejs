@@ -33,7 +33,7 @@ export class Bot {
 
   async connect(authToken?: string) {
     console.log('Loading wasm (', wasmPBC.byteLength, ') bytes');
-    await this.client.load(wasmPBC);
+    await this.client.loadAndStartMainLoop(wasmPBC);
     console.log('Wasm loaded');
 
     if (authToken) {

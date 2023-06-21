@@ -26,7 +26,7 @@ class Bot {
     }
     async connect(authToken) {
         console.log('Loading wasm (', wasmPBC.byteLength, ') bytes');
-        await this.client.load(wasmPBC);
+        await this.client.loadAndStartMainLoop(wasmPBC);
         console.log('Wasm loaded');
         if (authToken) {
             this.authToken = authToken;
