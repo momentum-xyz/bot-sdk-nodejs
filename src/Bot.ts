@@ -21,6 +21,7 @@ const POSBUS_URL = `${BACKEND_URL}/posbus`;
 
 // TODO move to core or sdk
 const CORE_PLUGIN_ID = 'f0f0f0f0-0f0f-4ff0-af0f-f0f0f0f0f0f0';
+const CUSTOM_OBJECT_TYPE_ID = '4ed3a5bb-53f8-4511-941b-07902982c31c';
 
 export class Bot {
   constructor(config: BotConfig) {
@@ -125,6 +126,38 @@ export class Bot {
       }
     ).then((resp) => resp.json());
     console.log('setObjectAttribute resp', resp);
+
+    // TODO handle error
+    // if (resp.error) {
+    //   throw new Error(resp.error);
+    // }
+    return resp;
+  }
+
+  async spawnObject({
+    name,
+    asset_3d_id,
+    transform,
+  }: {
+    name: string;
+    asset_3d_id: string;
+    transform?: TransformNoScale;
+  }) {
+    const resp = await fetch(`${BACKEND_URL}/api/v4/objects`, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${this.authToken}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        parent_id: this.config.worldId,
+        object_type_id: CUSTOM_OBJECT_TYPE_ID,
+        object_name: name,
+        asset_3d_id,
+        transform,
+      }),
+    }).then((resp) => resp.json());
+    console.log('spawnObject resp', resp);
 
     // TODO handle error
     // if (resp.error) {

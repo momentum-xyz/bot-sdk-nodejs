@@ -17,6 +17,11 @@ export declare class Bot {
         objectId: string;
         pluginId?: string;
     }): Promise<any>;
+    spawnObject({ name, asset_3d_id, transform, }: {
+        name: string;
+        asset_3d_id: string;
+        transform?: TransformNoScale;
+    }): Promise<any>;
     private handleMessage;
     private config;
     private client;
