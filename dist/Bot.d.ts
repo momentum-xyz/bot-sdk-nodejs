@@ -17,6 +17,30 @@ export declare class Bot {
         objectId: string;
         pluginId?: string;
     }): Promise<any>;
+    removeObjectAttribute({ name, objectId, pluginId, }: {
+        name: string;
+        objectId: string;
+        pluginId?: string;
+    }): Promise<any>;
+    getObjectAttribute({ name, objectId, pluginId, }: {
+        name: string;
+        objectId: string;
+        pluginId?: string;
+    }): Promise<any>;
+    /**
+     * Read object attribute value and subscribe to changes.
+     *
+     * Note that changes detection doesn't work for every attribute. The attribute needs to have posbus_auto Option in attribute_type.
+     *
+     * @returns unsubscribe function
+     */
+    subscribeToObjectAttribute({ name, objectId, pluginId, onChange, onError, }: {
+        name: string;
+        objectId: string;
+        pluginId?: string;
+        onChange?: (value: any) => void;
+        onError?: (err: Error) => void;
+    }): () => void;
     spawnObject({ name, asset_3d_id, transform, }: {
         name: string;
         asset_3d_id: string;
@@ -29,6 +53,7 @@ export declare class Bot {
     private authToken;
     private _isConnected;
     private _isReady;
+    private attributeSubscriptions;
 }
 export {};
 //# sourceMappingURL=Bot.d.ts.map

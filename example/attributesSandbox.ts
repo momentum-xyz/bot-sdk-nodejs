@@ -17,6 +17,20 @@ const config: BotConfig = {
       objectTransform = object.transform;
     }
   },
+
+  onJoinedWorld: (world) => {
+    console.log('Joined world!', world);
+    bot.subscribeToObjectAttribute({
+      name: 'auto_test',
+      objectId: worldId,
+      onChange: (value) => {
+        console.log('Subs: Attribute changed!', value);
+      },
+      onError: (err) => {
+        console.error('Subs: Failed to subscribe to attribute', err);
+      },
+    });
+  },
 };
 
 const bot = new Bot(config);
@@ -45,21 +59,25 @@ setInterval(() => {
     // objectTransform.rotation.y += 0.1;
     // bot.transformObject(objectId, objectTransform);
 
-    // generate random color
     const color = Math.floor(Math.random() * 16777215).toString(16);
-    console.log('color', color);
-
     bot
       .setObjectAttribute({
         name: 'auto_test',
         value: {
           value: '#' + color,
+          status: 'ok',
+          num: 42,
         },
         objectId: worldId,
       })
       .catch((err) => {
         console.error('Failed to set object attribute', err);
       });
+
+    // bot.removeObjectAttribute({
+    //   name: 'auto_test',
+    //   objectId: worldId,
+    // });
   } else {
     console.log('Spawn object...');
     bot

@@ -103,6 +103,67 @@ class Bot {
         // }
         return resp;
     }
+    async removeObjectAttribute({ name, objectId, pluginId = CORE_PLUGIN_ID, }) {
+        const resp = await fetch(`${BACKEND_URL}/api/v4/objects/${objectId}/attributes?${new URLSearchParams({
+            plugin_id: pluginId,
+            attribute_name: name,
+        })}`, {
+            method: 'DELETE',
+            headers: {
+                Authorization: `Bearer ${this.authToken}`,
+            },
+        }).then((resp) => resp.json());
+        console.log('removeObjectAttribute resp', resp);
+        // TODO handle error
+        // if (resp.error) {
+        //   throw new Error(resp.error);
+        // }
+        return resp;
+    }
+    async getObjectAttribute({ name, objectId, pluginId = CORE_PLUGIN_ID, }) {
+        const resp = await fetch(`${BACKEND_URL}/api/v4/objects/${objectId}/attributes?${new URLSearchParams({
+            plugin_id: pluginId || CORE_PLUGIN_ID,
+            attribute_name: name,
+        })}`, {
+            headers: {
+                Authorization: `Bearer ${this.authToken}`,
+            },
+        }).then((resp) => resp.json());
+        console.log('getObjectAttribute resp', resp);
+        // TODO handle error
+        // if (resp.error) {
+        //   throw new Error(resp.error);
+        // }
+        return resp;
+    }
+    /**
+     * Read object attribute value and subscribe to changes.
+     *
+     * Note that changes detection doesn't work for every attribute. The attribute needs to have posbus_auto Option in attribute_type.
+     *
+     * @returns unsubscribe function
+     */
+    subscribeToObjectAttribute({ name, objectId, pluginId = CORE_PLUGIN_ID, onChange, onError, }) {
+        console.log('subscribeToObjectAttribute', name, objectId, pluginId);
+        const handler = (event) => {
+            if (event.target_id === objectId &&
+                event.attribute_name === name &&
+                event.plugin_id === pluginId) {
+                onChange?.(event.value ?? null
+                // event.change_type === 'attribute_changed' ? event.value : null
+                );
+            }
+        };
+        this.getObjectAttribute({ name, objectId, pluginId })
+            .then((resp) => {
+            onChange?.(resp.value);
+            this.attributeSubscriptions.add(handler);
+        })
+            .catch(onError);
+        return () => {
+            this.attributeSubscriptions.delete(handler);
+        };
+    }
     async spawnObject({ name, asset_3d_id, transform, }) {
         const resp = await fetch(`${BACKEND_URL}/api/v4/objects`, {
             method: 'POST',
@@ -254,6 +315,13 @@ class Bot {
                 onHighFive?.(sender_id, message);
                 break;
             }
+            case posbus_client_1.MsgType.ATTRIBUTE_VALUE_CHANGED: {
+                // console.log('Handle posbus message attribute_value_changed', data);
+                for (const handler of this.attributeSubscriptions) {
+                    handler(data);
+                }
+                break;
+            }
             default:
                 console.log('Unhandled posbus message, type:', type, 'data:', data);
         }
@@ -264,5 +332,6 @@ class Bot {
     authToken;
     _isConnected = false;
     _isReady = false;
+    attributeSubscriptions = new Set();
 }
 exports.Bot = Bot;
