@@ -46,6 +46,7 @@ export declare class Bot implements BotInterface {
         asset_3d_id: string;
         transform?: TransformNoScale;
     }): Promise<any>;
+    removeObject(objectId: string): Promise<any>;
     private handleMessage;
     private config;
     private client;

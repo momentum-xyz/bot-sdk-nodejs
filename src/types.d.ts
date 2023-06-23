@@ -173,4 +173,14 @@ export class BotInterface {
     asset_3d_id: string;
     transform?: TransformNoScale;
   }): Promise<posbus.ObjectDefinition>;
+
+  /**
+   * Removes an object from the virtual world.
+   *
+   * @param {string} objectId - The ID of the object to remove.
+   * @returns {Promise<null>} - Returns a promise that resolves when the object is removed.
+   *                            The promise will reject if the object is not found or user has no admin rights.
+   *
+   */
+  removeObject(objectId: string): Promise<null>;
 }

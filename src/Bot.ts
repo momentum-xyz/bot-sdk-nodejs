@@ -279,6 +279,21 @@ export class Bot implements BotInterface {
     return resp;
   }
 
+  async removeObject(objectId: string) {
+    const resp = await fetch(`${BACKEND_URL}/api/v4/objects/${objectId}`, {
+      method: 'DELETE',
+      headers: {
+        Authorization: `Bearer ${this.authToken}`,
+      },
+    }).then((resp) => {
+      if (resp.status >= 300) {
+        throw new Error('Failed to remove object');
+      }
+      return resp.json();
+    });
+    return resp;
+  }
+
   // ----- PRIVATE -----
 
   private handleMessage = (event: PosbusEvent) => {
