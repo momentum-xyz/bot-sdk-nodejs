@@ -3,11 +3,16 @@ import { Bot, getAuthTokenWithPrivateKey, posbus } from '../';
 import type { BotConfig } from '../dist/types';
 
 let myUserId: string | null = null;
-let myUserTransform: posbus.TransformNoScale | null = null;
 let objectToMoveId: string | null = null;
+let objectTransform: posbus.Transform | null = null;
+
+const {
+  OBJECT_NAME = 'CubeX3',
+  WORLD_ID = '00000000-0000-8000-8000-000000000005',
+} = process.env;
 
 const config: BotConfig = {
-  worldId: '00000000-0000-8000-8000-000000000005',
+  worldId: WORLD_ID,
   onConnected: (userId) => {
     console.log('Connected!');
     myUserId = userId;
@@ -15,24 +20,48 @@ const config: BotConfig = {
   onUserAdded: (user) => {
     console.log('User added!', user);
     if (user.id === myUserId) {
-      myUserTransform = user.transform;
+      // me, noop
     } else {
+      const { position, rotation } = user.transform;
+      bot.moveUser({
+        position: {
+          x: position.x + rotation.x * 0.5,
+          y: position.y + rotation.y * 0.5,
+          z: position.z + rotation.z * 0.5,
+        },
+        rotation,
+      });
       setTimeout(() => {
         bot.sendHighFive(user.id, `~~ High5 Bot ~~`);
-      }, 3000);
-    }
-  },
-  onUserMove: (user) => {
-    console.log('User move!', user);
-    if (user.id === myUserId) {
-      myUserTransform = user.transform;
+      }, 1000);
     }
   },
 
   onObjectAdded: (object) => {
     console.log('Object added!', object);
-    if (object.name === 'nic car') {
+    if (object.name === OBJECT_NAME) {
       objectToMoveId = object.id;
+      objectTransform = object.transform;
+    }
+  },
+
+  onHighFive: (userId, message) => {
+    console.log('High five!', userId, message);
+    if (objectToMoveId) {
+      const color = Math.floor(Math.random() * 16777215).toString(16);
+      console.log('New color', color);
+
+      bot
+        .setObjectAttribute({
+          name: 'object_color',
+          value: {
+            value: '#' + color,
+          },
+          objectId: objectToMoveId,
+        })
+        .catch((err) => {
+          console.error('Failed to set object attribute', err);
+        });
     }
   },
 
@@ -46,7 +75,7 @@ const config: BotConfig = {
 
 const bot = new Bot(config);
 
-const privateKey = process.argv[2];
+const privateKey = process.env['BOT_SDK_PRIVATE_KEY'];
 if (privateKey) {
   console.log('Private key passed. Get the auth token...');
   getAuthTokenWithPrivateKey(privateKey)
@@ -63,39 +92,34 @@ if (privateKey) {
   bot.connect();
 }
 
+type Vector2 = { x: number; y: number };
+
+const generatePosition: (
+  center: Vector2,
+  radius: number,
+  progress: number
+) => Vector2 = (center, radius, progress) => {
+  const angle = progress * Math.PI * 2;
+  return {
+    x: center.x + Math.cos(angle) * radius,
+    y: center.y + Math.sin(angle) * radius,
+  };
+};
+
+const radius = 5;
+let progress = 0;
+
 setInterval(() => {
-  if (!bot.IsReady || !myUserTransform) return;
+  if (!bot.IsReady) return;
 
-  bot.moveUser({
-    position: {
-      x: myUserTransform.position.x + 0.2,
-      y: myUserTransform.position.y,
-      z: myUserTransform.position.z,
-    },
-    rotation: {
-      x: myUserTransform.rotation.x,
-      y: myUserTransform.rotation.y,
-      z: myUserTransform.rotation.z,
-    },
-  });
-
-  if (objectToMoveId) {
+  if (objectToMoveId && objectTransform) {
+    progress += 0.01;
     bot.transformObject(objectToMoveId, {
+      ...objectTransform,
       position: {
-        x: myUserTransform.position.x,
-        y: myUserTransform.position.y - 0.5,
-        z: myUserTransform.position.z + 0.2,
-      },
-      rotation: {
-        x: myUserTransform.rotation.x,
-        y: myUserTransform.rotation.y + 1.7,
-        z: myUserTransform.rotation.z,
-      },
-      scale: {
-        x: 1,
-        y: 1,
-        z: 1,
+        ...objectTransform.position,
+        ...generatePosition(objectTransform?.position, radius, progress),
       },
     });
   }
-}, 1000);
+}, 3000);
