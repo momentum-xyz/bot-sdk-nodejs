@@ -1,15 +1,13 @@
 {
   "extends": "@tsconfig/node-lts-strictest-esm/tsconfig.json",
+  "include": [],
   "exclude": ["dist", "node_modules", "example"],
   "compilerOptions": {
     "rootDir": ".",
     "composite": true,
-    "declaration": true,
-    "declarationDir": "dist",
-    "declarationMap": true,
-    "emitDeclarationOnly": true,
     "checkJs": false,
     "isolatedModules": true,
+    "noEmit": true,
     "lib": ["ESNext"],
     "module": "CommonJS",
     "ignoreDeprecations": "5.0"
