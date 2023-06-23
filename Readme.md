@@ -106,3 +106,11 @@ npm version prerelease
 
 git push origin main --tags
 ```
+
+### Configuration
+
+This variable is taken as base URL for websocket connection and API calls:
+
+```
+export BACKEND_URL='https://dev.odyssey.ninja'
+```
