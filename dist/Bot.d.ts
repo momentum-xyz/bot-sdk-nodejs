@@ -1,9 +1,9 @@
 /// <reference lib="dom" />
 import 'websocket-polyfill';
 import { posbus } from '@momentum-xyz/posbus-client';
-import type { BotConfig } from './types';
+import type { BotConfig, BotInterface } from './types';
 type TransformNoScale = posbus.TransformNoScale;
-export declare class Bot {
+export declare class Bot implements BotInterface {
     constructor(config: BotConfig);
     connect(authToken?: string): Promise<void>;
     get isConnected(): boolean;

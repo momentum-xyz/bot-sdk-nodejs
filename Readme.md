@@ -75,6 +75,18 @@ getAuthTokenWithPrivateKey(privateKey)
   });
 ```
 
+## API Reference
+
+For Auth token generation there are two functions:
+
+```ts
+const getAuthTokenWithPrivateKey = async (key: string) => {...}
+
+const getAuthTokenWithMnemonicPhrase = async (phrase: string) => {...}
+```
+
+Read the comments in the [src/types.d.ts](src/types.d.ts) file describing `BotConfig` and `Bot` class.
+
 ## Development
 
 Close the repo and install dependencies:

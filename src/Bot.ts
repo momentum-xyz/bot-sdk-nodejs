@@ -8,7 +8,7 @@ import {
   MsgType,
 } from '@momentum-xyz/posbus-client';
 import fs from 'fs';
-import type { BotConfig } from './types';
+import type { BotConfig, BotInterface } from './types';
 
 const wasmURL = require.resolve('@momentum-xyz/posbus-client/pbc.wasm');
 const wasmPBC = fs.readFileSync(wasmURL);
@@ -23,7 +23,7 @@ const POSBUS_URL = `${BACKEND_URL}/posbus`;
 const CORE_PLUGIN_ID = 'f0f0f0f0-0f0f-4ff0-af0f-f0f0f0f0f0f0';
 const CUSTOM_OBJECT_TYPE_ID = '4ed3a5bb-53f8-4511-941b-07902982c31c';
 
-export class Bot {
+export class Bot implements BotInterface {
   constructor(config: BotConfig) {
     this.config = config;
     if (!this.config.worldId) {
