@@ -35,14 +35,24 @@ class Bot {
                 headers: {
                     Authorization: `Bearer ${authToken}`,
                 },
-            }).then((resp) => resp.json());
+            }).then((resp) => {
+                if (resp.status >= 300) {
+                    throw new Error('Failed to get user');
+                }
+                return resp.json();
+            });
             console.log('Users/me:', user);
             this.userId = user.id;
         }
         else {
             const resp = await fetch(`${BACKEND_URL}/api/v4/auth/guest-token`, {
                 method: 'POST',
-            }).then((resp) => resp.json());
+            }).then((resp) => {
+                if (resp.status >= 300) {
+                    throw new Error('Failed to get guest token');
+                }
+                return resp.json();
+            });
             const { token, id: userId } = resp;
             console.log('GUEST token', token, 'userId', userId);
             this.authToken = token;
@@ -95,12 +105,12 @@ class Bot {
                 attribute_name: name,
                 attribute_value: value,
             }),
-        }).then((resp) => resp.json());
-        console.log('setObjectAttribute resp', resp);
-        // TODO handle error
-        // if (resp.error) {
-        //   throw new Error(resp.error);
-        // }
+        }).then((resp) => {
+            if (resp.status >= 300) {
+                throw new Error('Failed to set object attribute');
+            }
+            return resp.json();
+        });
         return resp;
     }
     async removeObjectAttribute({ name, objectId, pluginId = CORE_PLUGIN_ID, }) {
@@ -112,12 +122,12 @@ class Bot {
             headers: {
                 Authorization: `Bearer ${this.authToken}`,
             },
-        }).then((resp) => resp.json());
-        console.log('removeObjectAttribute resp', resp);
-        // TODO handle error
-        // if (resp.error) {
-        //   throw new Error(resp.error);
-        // }
+        }).then((resp) => {
+            if (resp.status >= 300) {
+                throw new Error('Failed to remove object attribute');
+            }
+            return resp.json();
+        });
         return resp;
     }
     async getObjectAttribute({ name, objectId, pluginId = CORE_PLUGIN_ID, }) {
@@ -128,12 +138,12 @@ class Bot {
             headers: {
                 Authorization: `Bearer ${this.authToken}`,
             },
-        }).then((resp) => resp.json());
-        console.log('getObjectAttribute resp', resp);
-        // TODO handle error
-        // if (resp.error) {
-        //   throw new Error(resp.error);
-        // }
+        }).then((resp) => {
+            if (resp.status >= 300) {
+                throw new Error('Failed to get object attribute');
+            }
+            return resp.json();
+        });
         return resp;
     }
     /**
@@ -178,12 +188,12 @@ class Bot {
                 asset_3d_id,
                 transform,
             }),
-        }).then((resp) => resp.json());
-        console.log('spawnObject resp', resp);
-        // TODO handle error
-        // if (resp.error) {
-        //   throw new Error(resp.error);
-        // }
+        }).then((resp) => {
+            if (resp.status >= 300) {
+                throw new Error('Failed to spawn object');
+            }
+            return resp.json();
+        });
         return resp;
     }
     // ----- PRIVATE -----
