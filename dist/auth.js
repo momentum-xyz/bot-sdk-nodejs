@@ -10,7 +10,11 @@ const _getAuthToken = async (wallet) => {
     console.log('Get Auth token for address', address);
     const respChallenge = await fetch(`${BACKEND_URL}/api/v4/auth/challenge?${new URLSearchParams({
         wallet: address,
-    })}`).then((resp) => resp.json());
+    })}`).then((resp) => {
+        if (resp.status !== 200)
+            throw new Error('Failed to get challenge');
+        return resp.json();
+    });
     console.log('Received challenge', respChallenge, '- sign it now');
     const signedChallenge = wallet.signMessageSync(respChallenge.challenge);
     console.log('Challenge signed. Fetch token');
@@ -21,7 +25,11 @@ const _getAuthToken = async (wallet) => {
             wallet: address,
             network: 'ethereum',
         }),
-    }).then((resp) => resp.json());
+    }).then((resp) => {
+        if (resp.status !== 200)
+            throw new Error('Failed to get token');
+        return resp.json();
+    });
     console.log('Token received', respToken);
     return respToken.token;
 };

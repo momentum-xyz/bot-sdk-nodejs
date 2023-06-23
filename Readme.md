@@ -75,6 +75,18 @@ getAuthTokenWithPrivateKey(privateKey)
   });
 ```
 
+## API Reference
+
+For Auth token generation there are two functions:
+
+```ts
+const getAuthTokenWithPrivateKey = async (key: string) => {...}
+
+const getAuthTokenWithMnemonicPhrase = async (phrase: string) => {...}
+```
+
+Read the comments in the [src/types.d.ts](src/types.d.ts) file describing `BotConfig` and `Bot` class.
+
 ## Development
 
 Close the repo and install dependencies:
@@ -105,4 +117,12 @@ To deploy a new version:
 npm version prerelease
 
 git push origin main --tags
+```
+
+### Configuration
+
+This variable is taken as base URL for websocket connection and API calls:
+
+```
+export BACKEND_URL='https://dev.odyssey.ninja'
 ```

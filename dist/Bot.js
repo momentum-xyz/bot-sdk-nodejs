@@ -14,6 +14,9 @@ const wasmPBC = fs_1.default.readFileSync(wasmURL);
 // type Transform = posbus.Transform;
 const { BACKEND_URL = 'https://dev.odyssey.ninja' } = process.env;
 const POSBUS_URL = `${BACKEND_URL}/posbus`;
+// TODO move to core or sdk
+const CORE_PLUGIN_ID = 'f0f0f0f0-0f0f-4ff0-af0f-f0f0f0f0f0f0';
+const CUSTOM_OBJECT_TYPE_ID = '4ed3a5bb-53f8-4511-941b-07902982c31c';
 class Bot {
     constructor(config) {
         this.config = config;
@@ -23,21 +26,33 @@ class Bot {
         this.client = new posbus_client_1.PBClient(this.handleMessage);
     }
     async connect(authToken) {
-        this.client.load(wasmPBC);
+        console.log('Loading wasm (', wasmPBC.byteLength, ') bytes');
+        await this.client.loadAndStartMainLoop(wasmPBC);
+        console.log('Wasm loaded');
         if (authToken) {
             this.authToken = authToken;
             const user = await fetch(`${BACKEND_URL}/api/v4/users/me`, {
                 headers: {
                     Authorization: `Bearer ${authToken}`,
                 },
-            }).then((resp) => resp.json());
+            }).then((resp) => {
+                if (resp.status >= 300) {
+                    throw new Error('Failed to get user');
+                }
+                return resp.json();
+            });
             console.log('Users/me:', user);
             this.userId = user.id;
         }
         else {
             const resp = await fetch(`${BACKEND_URL}/api/v4/auth/guest-token`, {
                 method: 'POST',
-            }).then((resp) => resp.json());
+            }).then((resp) => {
+                if (resp.status >= 300) {
+                    throw new Error('Failed to get guest token');
+                }
+                return resp.json();
+            });
             const { token, id: userId } = resp;
             console.log('GUEST token', token, 'userId', userId);
             this.authToken = token;
@@ -46,7 +61,9 @@ class Bot {
         if (!this.authToken || !this.userId) {
             throw new Error('authToken or userId is not set');
         }
+        console.log('About to start connecting to', POSBUS_URL);
         await this.client.connect(POSBUS_URL, this.authToken, this.userId);
+        console.log('Teleport to world', this.config.worldId);
         this.client.teleport(this.config.worldId);
     }
     get isConnected() {
@@ -75,6 +92,124 @@ class Bot {
             },
         ]);
     }
+    async setObjectAttribute({ name, value, objectId, pluginId, }) {
+        const resp = await fetch(`${BACKEND_URL}/api/v4/objects/${objectId}/attributes`, {
+            method: 'POST',
+            headers: {
+                Authorization: `Bearer ${this.authToken}`,
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                object_id: objectId,
+                plugin_id: pluginId || CORE_PLUGIN_ID,
+                attribute_name: name,
+                attribute_value: value,
+            }),
+        }).then((resp) => {
+            if (resp.status >= 300) {
+                throw new Error('Failed to set object attribute');
+            }
+            return resp.json();
+        });
+        return resp;
+    }
+    async removeObjectAttribute({ name, objectId, pluginId = CORE_PLUGIN_ID, }) {
+        const resp = await fetch(`${BACKEND_URL}/api/v4/objects/${objectId}/attributes?${new URLSearchParams({
+            plugin_id: pluginId,
+            attribute_name: name,
+        })}`, {
+            method: 'DELETE',
+            headers: {
+                Authorization: `Bearer ${this.authToken}`,
+            },
+        }).then((resp) => {
+            if (resp.status >= 300) {
+                throw new Error('Failed to remove object attribute');
+            }
+            return resp.json();
+        });
+        return resp;
+    }
+    async getObjectAttribute({ name, objectId, pluginId = CORE_PLUGIN_ID, }) {
+        const resp = await fetch(`${BACKEND_URL}/api/v4/objects/${objectId}/attributes?${new URLSearchParams({
+            plugin_id: pluginId || CORE_PLUGIN_ID,
+            attribute_name: name,
+        })}`, {
+            headers: {
+                Authorization: `Bearer ${this.authToken}`,
+            },
+        }).then((resp) => {
+            if (resp.status >= 300) {
+                throw new Error('Failed to get object attribute');
+            }
+            return resp.json();
+        });
+        return resp;
+    }
+    /**
+     * Read object attribute value and subscribe to changes.
+     *
+     * Note that changes detection doesn't work for every attribute. The attribute needs to have posbus_auto Option in attribute_type.
+     *
+     * @returns unsubscribe function
+     */
+    subscribeToObjectAttribute({ name, objectId, pluginId = CORE_PLUGIN_ID, onChange, onError, }) {
+        console.log('subscribeToObjectAttribute', name, objectId, pluginId);
+        const handler = (event) => {
+            if (event.target_id === objectId &&
+                event.attribute_name === name &&
+                event.plugin_id === pluginId) {
+                onChange?.(event.value ?? null
+                // event.change_type === 'attribute_changed' ? event.value : null
+                );
+            }
+        };
+        this.getObjectAttribute({ name, objectId, pluginId })
+            .then((resp) => {
+            onChange?.(resp.value);
+            this.attributeSubscriptions.add(handler);
+        })
+            .catch(onError);
+        return () => {
+            this.attributeSubscriptions.delete(handler);
+        };
+    }
+    async spawnObject({ name, asset_3d_id, transform, }) {
+        const resp = await fetch(`${BACKEND_URL}/api/v4/objects`, {
+            method: 'POST',
+            headers: {
+                Authorization: `Bearer ${this.authToken}`,
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                parent_id: this.config.worldId,
+                object_type_id: CUSTOM_OBJECT_TYPE_ID,
+                object_name: name,
+                asset_3d_id,
+                transform,
+            }),
+        }).then((resp) => {
+            if (resp.status >= 300) {
+                throw new Error('Failed to spawn object');
+            }
+            return resp.json();
+        });
+        return resp;
+    }
+    async removeObject(objectId) {
+        const resp = await fetch(`${BACKEND_URL}/api/v4/objects/${objectId}`, {
+            method: 'DELETE',
+            headers: {
+                Authorization: `Bearer ${this.authToken}`,
+            },
+        }).then((resp) => {
+            if (resp.status >= 300) {
+                throw new Error('Failed to remove object');
+            }
+            return resp.json();
+        });
+        return resp;
+    }
     // ----- PRIVATE -----
     handleMessage = (event) => {
         // console.log(`PosBus message [${this.userId}]:`, event.data);
@@ -83,7 +218,7 @@ class Bot {
             return;
         }
         const [type, data] = event.data;
-        const { onConnected, onDisconnected, onJoinedWorld, onUserAdded, onUserMove, onUserRemoved, onObjectAdded, onObjectMove, onObjectRemoved, onHighFive, } = this.config;
+        const { onConnected, onDisconnected, onJoinedWorld, onMyPosition, onUserAdded, onUserMove, onUserRemoved, onObjectAdded, onObjectMove, onObjectRemoved, onHighFive, unsafe_onRawMessage, } = this.config;
         switch (type) {
             case posbus_client_1.MsgType.SIGNAL: {
                 const { value } = data;
@@ -94,6 +229,9 @@ class Bot {
                 else {
                     // Disconnected, dual-connect, world doesn't exist, etc
                     this._isConnected = false;
+                    if (value === 1) {
+                        console.log('PosBus SIGNAL 1, dual-connect with same account!');
+                    }
                     onDisconnected?.();
                 }
                 break;
@@ -101,6 +239,8 @@ class Bot {
             case posbus_client_1.MsgType.ADD_USERS: {
                 const { users } = data;
                 for (const user of users) {
+                    if (user.id === this.userId)
+                        continue;
                     onUserAdded?.(user);
                 }
                 break;
@@ -115,6 +255,8 @@ class Bot {
             case posbus_client_1.MsgType.USERS_TRANSFORM_LIST: {
                 const { value: users } = data;
                 for (const user of users) {
+                    if (user.id === this.userId)
+                        continue;
                     onUserMove?.(user);
                 }
                 break;
@@ -151,6 +293,10 @@ class Bot {
                 onJoinedWorld?.(data);
                 break;
             }
+            case posbus_client_1.MsgType.MY_TRANSFORM: {
+                onMyPosition?.(data);
+                break;
+            }
             case posbus_client_1.MsgType.ADD_OBJECTS: {
                 const { objects } = data;
                 for (const object of objects) {
@@ -173,23 +319,6 @@ class Bot {
             //   console.log('Temp ignore posbus message lock_object_response', data);
             //   break;
             // }
-            // case MsgType.ATTRIBUTE_VALUE_CHANGED: {
-            //   console.log('[PosBus Msg] ATTRIBUTE_VALUE_CHANGED: ', data);
-            //   switch (data.topic) {
-            //     case 'voice-chat-user': {
-            //       const { attribute_name, value } = data.data;
-            //       if (attribute_name === AttributeNameEnum.VOICE_CHAT_USER) {
-            //         if (value && value.joined) {
-            //           Event3dEmitter.emit('UserJoinedVoiceChat', value.userId);
-            //         } else if (value) {
-            //           Event3dEmitter.emit('UserLeftVoiceChat', value.userId);
-            //         }
-            //       }
-            //       break;
-            //     }
-            //   }
-            //   break;
-            // }
             case posbus_client_1.MsgType.HIGH_FIVE: {
                 // console.log('Handle posbus message high_five', data);
                 const { sender_id, receiver_id, message } = data;
@@ -200,9 +329,17 @@ class Bot {
                 onHighFive?.(sender_id, message);
                 break;
             }
+            case posbus_client_1.MsgType.ATTRIBUTE_VALUE_CHANGED: {
+                // console.log('Handle posbus message attribute_value_changed', data);
+                for (const handler of this.attributeSubscriptions) {
+                    handler(data);
+                }
+                break;
+            }
             default:
                 console.log('Unhandled posbus message, type:', type, 'data:', data);
         }
+        unsafe_onRawMessage?.(event);
     };
     config;
     client;
@@ -210,5 +347,6 @@ class Bot {
     authToken;
     _isConnected = false;
     _isReady = false;
+    attributeSubscriptions = new Set();
 }
 exports.Bot = Bot;
