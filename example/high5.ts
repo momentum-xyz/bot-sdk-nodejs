@@ -19,22 +19,19 @@ const config: BotConfig = {
   },
   onUserAdded: (user) => {
     console.log('User added!', user);
-    if (user.id === myUserId) {
-      // me, noop
-    } else {
-      const { position, rotation } = user.transform;
-      bot.moveUser({
-        position: {
-          x: position.x + rotation.x * 0.5,
-          y: position.y + rotation.y * 0.5,
-          z: position.z + rotation.z * 0.5,
-        },
-        rotation,
-      });
-      setTimeout(() => {
-        bot.sendHighFive(user.id, `~~ High5 Bot ~~`);
-      }, 1000);
-    }
+
+    const { position, rotation } = user.transform;
+    bot.moveUser({
+      position: {
+        x: position.x + rotation.x * 0.5,
+        y: position.y + rotation.y * 0.5,
+        z: position.z + rotation.z * 0.5,
+      },
+      rotation,
+    });
+    setTimeout(() => {
+      bot.sendHighFive(user.id, `~~ High5 Bot ~~`);
+    }, 1000);
   },
 
   onObjectAdded: (object) => {

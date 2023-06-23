@@ -292,6 +292,7 @@ export class Bot {
       onConnected,
       onDisconnected,
       onJoinedWorld,
+      onMyPosition,
       onUserAdded,
       onUserMove,
       onUserRemoved,
@@ -299,6 +300,7 @@ export class Bot {
       onObjectMove,
       onObjectRemoved,
       onHighFive,
+      unsafe_onRawMessage,
     } = this.config;
 
     switch (type) {
@@ -321,6 +323,7 @@ export class Bot {
       case MsgType.ADD_USERS: {
         const { users } = data;
         for (const user of users) {
+          if (user.id === this.userId) continue;
           onUserAdded?.(user);
         }
         break;
@@ -338,6 +341,7 @@ export class Bot {
         const { value: users } = data;
 
         for (const user of users) {
+          if (user.id === this.userId) continue;
           onUserMove?.(user);
         }
         break;
@@ -377,6 +381,10 @@ export class Bot {
         onJoinedWorld?.(data);
         break;
       }
+      case MsgType.MY_TRANSFORM: {
+        onMyPosition?.(data);
+        break;
+      }
 
       case MsgType.ADD_OBJECTS: {
         const { objects } = data;
@@ -404,24 +412,6 @@ export class Bot {
       //   break;
       // }
 
-      // case MsgType.ATTRIBUTE_VALUE_CHANGED: {
-      //   console.log('[PosBus Msg] ATTRIBUTE_VALUE_CHANGED: ', data);
-      //   switch (data.topic) {
-      //     case 'voice-chat-user': {
-      //       const { attribute_name, value } = data.data;
-      //       if (attribute_name === AttributeNameEnum.VOICE_CHAT_USER) {
-      //         if (value && value.joined) {
-      //           Event3dEmitter.emit('UserJoinedVoiceChat', value.userId);
-      //         } else if (value) {
-      //           Event3dEmitter.emit('UserLeftVoiceChat', value.userId);
-      //         }
-      //       }
-      //       break;
-      //     }
-      //   }
-      //   break;
-      // }
-
       case MsgType.HIGH_FIVE: {
         // console.log('Handle posbus message high_five', data);
         const { sender_id, receiver_id, message } = data;
@@ -445,6 +435,8 @@ export class Bot {
       default:
         console.log('Unhandled posbus message, type:', type, 'data:', data);
     }
+
+    unsafe_onRawMessage?.(event);
   };
 
   private config: BotConfig;

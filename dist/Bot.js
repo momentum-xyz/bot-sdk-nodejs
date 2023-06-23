@@ -204,7 +204,7 @@ class Bot {
             return;
         }
         const [type, data] = event.data;
-        const { onConnected, onDisconnected, onJoinedWorld, onUserAdded, onUserMove, onUserRemoved, onObjectAdded, onObjectMove, onObjectRemoved, onHighFive, } = this.config;
+        const { onConnected, onDisconnected, onJoinedWorld, onMyPosition, onUserAdded, onUserMove, onUserRemoved, onObjectAdded, onObjectMove, onObjectRemoved, onHighFive, unsafe_onRawMessage, } = this.config;
         switch (type) {
             case posbus_client_1.MsgType.SIGNAL: {
                 const { value } = data;
@@ -225,6 +225,8 @@ class Bot {
             case posbus_client_1.MsgType.ADD_USERS: {
                 const { users } = data;
                 for (const user of users) {
+                    if (user.id === this.userId)
+                        continue;
                     onUserAdded?.(user);
                 }
                 break;
@@ -239,6 +241,8 @@ class Bot {
             case posbus_client_1.MsgType.USERS_TRANSFORM_LIST: {
                 const { value: users } = data;
                 for (const user of users) {
+                    if (user.id === this.userId)
+                        continue;
                     onUserMove?.(user);
                 }
                 break;
@@ -248,7 +252,6 @@ class Bot {
                 onObjectMove?.(id, object_transform);
                 break;
             }
-            // TODO my_transform
             case posbus_client_1.MsgType.OBJECT_DATA: {
                 // TEMP ignore
                 // console.log('PosBus set_object_data', data);
@@ -276,6 +279,10 @@ class Bot {
                 onJoinedWorld?.(data);
                 break;
             }
+            case posbus_client_1.MsgType.MY_TRANSFORM: {
+                onMyPosition?.(data);
+                break;
+            }
             case posbus_client_1.MsgType.ADD_OBJECTS: {
                 const { objects } = data;
                 for (const object of objects) {
@@ -298,23 +305,6 @@ class Bot {
             //   console.log('Temp ignore posbus message lock_object_response', data);
             //   break;
             // }
-            // case MsgType.ATTRIBUTE_VALUE_CHANGED: {
-            //   console.log('[PosBus Msg] ATTRIBUTE_VALUE_CHANGED: ', data);
-            //   switch (data.topic) {
-            //     case 'voice-chat-user': {
-            //       const { attribute_name, value } = data.data;
-            //       if (attribute_name === AttributeNameEnum.VOICE_CHAT_USER) {
-            //         if (value && value.joined) {
-            //           Event3dEmitter.emit('UserJoinedVoiceChat', value.userId);
-            //         } else if (value) {
-            //           Event3dEmitter.emit('UserLeftVoiceChat', value.userId);
-            //         }
-            //       }
-            //       break;
-            //     }
-            //   }
-            //   break;
-            // }
             case posbus_client_1.MsgType.HIGH_FIVE: {
                 // console.log('Handle posbus message high_five', data);
                 const { sender_id, receiver_id, message } = data;
@@ -335,6 +325,7 @@ class Bot {
             default:
                 console.log('Unhandled posbus message, type:', type, 'data:', data);
         }
+        unsafe_onRawMessage?.(event);
     };
     config;
     client;

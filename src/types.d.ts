@@ -7,6 +7,7 @@ export interface BotConfig {
   onDisconnected?: () => void;
 
   onJoinedWorld?: (worldInfo: posbus.SetWorld) => void;
+  onMyPosition?: (transform: posbus.MyTransform) => void;
 
   onUserAdded?: (user: posbus.UserData) => void;
   onUserMove?: (user: posbus.UserTransform) => void;
@@ -18,5 +19,6 @@ export interface BotConfig {
 
   onHighFive?(userId: string, message?: string): void;
 
-  // TODO Attr
+  // Not recommended to use unless you know what you're doing, subject to change
+  unsafe_onRawMessage?: (message: posbus.Message) => void;
 }
