@@ -1,22 +1,22 @@
 // import { Bot, posbus } from '@momentum-xyz/bot-sdk';
-import { Bot, getAuthTokenWithPrivateKey, posbus } from '../dist';
+import { Bot, getAuthTokenWithPrivateKey } from '../dist';
 import type { BotConfig } from '../dist/types';
 
-let objectId: string | null = null;
-let objectTransform: posbus.Transform | null = null;
+// let objectId: string | null = null;
+// let objectTransform: posbus.Transform | null = null;
 
 const worldId = '00000000-0000-8000-8000-000000000005';
 
 const config: BotConfig = {
   worldId,
 
-  onObjectAdded: (object) => {
-    console.log('Object added!', object);
-    if (object.name === 'AttrX') {
-      objectId = object.id;
-      objectTransform = object.transform;
-    }
-  },
+  // onObjectAdded: (object) => {
+  //   console.log('Object added!', object);
+  //   if (object.name === 'AttrX') {
+  //     objectId = object.id;
+  //     objectTransform = object.transform;
+  //   }
+  // },
 
   onJoinedWorld: (world) => {
     console.log('Joined world!', world);
@@ -55,41 +55,46 @@ if (privateKey) {
 setInterval(() => {
   if (!bot.IsReady) return;
 
-  if (objectId && objectTransform) {
-    // objectTransform.rotation.y += 0.1;
-    // bot.transformObject(objectId, objectTransform);
-
-    const color = Math.floor(Math.random() * 16777215).toString(16);
-    bot
-      .setObjectAttribute({
-        name: 'auto_test',
-        value: {
-          value: '#' + color,
-          status: 'ok',
-          num: 42,
+  const color = Math.floor(Math.random() * 16777215).toString(16);
+  bot
+    .setObjectAttribute({
+      name: 'auto_test',
+      value: {
+        value: '#' + color,
+        status: 'ok',
+        num: 42,
+        obj: {
+          a: 1,
+          b: 2,
+          arr: [1, 2, 3],
         },
-        objectId: worldId,
-      })
-      .catch((err) => {
-        console.error('Failed to set object attribute', err);
-      });
+      },
+      objectId: worldId,
+    })
+    .catch((err) => {
+      console.error('Failed to set object attribute', err);
+    });
 
-    // bot.removeObjectAttribute({
-    //   name: 'auto_test',
-    //   objectId: worldId,
-    // });
-  } else {
-    console.log('Spawn object...');
-    bot
-      .spawnObject({
-        name: 'AttrX',
-        asset_3d_id: 'a1f144de-b21a-d1e9-0635-6eb250927326',
-      })
-      .then(({ object_id }) => {
-        objectId = object_id;
-      })
-      .catch((err) => {
-        console.error('Failed to spawn object', err);
-      });
-  }
+  // if (objectId && objectTransform) {
+  // objectTransform.rotation.y += 0.1;
+  // bot.transformObject(objectId, objectTransform);
+  //
+  // bot.removeObjectAttribute({
+  //   name: 'auto_test',
+  //   objectId: worldId,
+  // });
+  // } else {
+  //   console.log('Spawn object...');
+  //   bot
+  //     .spawnObject({
+  //       name: 'AttrX',
+  //       asset_3d_id: 'a1f144de-b21a-d1e9-0635-6eb250927326',
+  //     })
+  //     .then(({ object_id }) => {
+  //       objectId = object_id;
+  //     })
+  //     .catch((err) => {
+  //       console.error('Failed to spawn object', err);
+  //     });
+  // }
 }, 5000);
