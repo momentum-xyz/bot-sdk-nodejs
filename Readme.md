@@ -75,6 +75,10 @@ getAuthTokenWithPrivateKey(privateKey)
   });
 ```
 
+## Boilerplate projects
+
+For easier start you can use one of the boilerplate projects for [Typescript](https://github.com/momentum-xyz/bot-nodejs-ts-example) and [Javascript](https://github.com/momentum-xyz/bot-nodejs-example)
+
 ## API Reference
 
 For Auth token generation there are two functions:
