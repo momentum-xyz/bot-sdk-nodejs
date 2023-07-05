@@ -75,6 +75,8 @@ getAuthTokenWithPrivateKey(privateKey)
   });
 ```
 
+Here's how to [retrive the account's private key in MetaMask](https://support.metamask.io/hc/en-us/articles/360015289632-How-to-export-an-account-s-private-key).
+
 ## Boilerplate projects
 
 For easier start you can use one of the boilerplate projects for [Typescript](https://github.com/momentum-xyz/bot-nodejs-ts-example) and [Javascript](https://github.com/momentum-xyz/bot-nodejs-example)
