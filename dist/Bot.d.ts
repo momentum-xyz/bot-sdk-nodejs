@@ -2,13 +2,12 @@
 import 'websocket-polyfill';
 import { posbus } from '@momentum-xyz/posbus-client';
 import type { BotConfig, BotInterface } from './types';
-type TransformNoScale = posbus.TransformNoScale;
 export declare class Bot implements BotInterface {
     constructor(config: BotConfig);
     connect(authToken?: string): Promise<void>;
     get isConnected(): boolean;
     get IsReady(): boolean;
-    moveUser(transform: TransformNoScale): void;
+    moveUser(transform: posbus.TransformNoScale): void;
     transformObject(objectId: string, object_transform: posbus.Transform): void;
     sendHighFive(userId: string, message?: string): void;
     setObjectAttribute({ name, value, objectId, pluginId, }: {
@@ -44,7 +43,7 @@ export declare class Bot implements BotInterface {
     spawnObject({ name, asset_3d_id, transform, }: {
         name: string;
         asset_3d_id: string;
-        transform?: TransformNoScale;
+        transform?: posbus.Transform;
     }): Promise<any>;
     removeObject(objectId: string): Promise<any>;
     private handleMessage;
@@ -56,5 +55,4 @@ export declare class Bot implements BotInterface {
     private _isReady;
     private attributeSubscriptions;
 }
-export {};
 //# sourceMappingURL=Bot.d.ts.map

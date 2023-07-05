@@ -53,7 +53,7 @@ export class BotInterface {
    *
    * @param {TransformNoScale} transform - The transformation parameters to move the user. This includes position, rotation, but not scale.
    */
-  moveUser(transform: TransformNoScale): void;
+  moveUser(transform: posbus.TransformNoScale): void;
 
   /**
    * Transforms an object by changing its position, rotation, and/or scale.
@@ -161,7 +161,7 @@ export class BotInterface {
    * @param {Object} params - An object that contains parameters for the new object.
    * @param {string} params.name - The name of the new object.
    * @param {string} params.asset_3d_id - The 3D model that the new object will use.
-   * @param {TransformNoScale} params.transform - Optional. The initial position and rotation of the new object.
+   * @param {posbus.Transform} params.transform - Optional. The initial position and rotation of the new object.
    *                                              Current user position and rotation will be used if not specified.
    */
   spawnObject({
@@ -171,7 +171,7 @@ export class BotInterface {
   }: {
     name: string;
     asset_3d_id: string;
-    transform?: TransformNoScale;
+    transform?: posbus.Transform;
   }): Promise<posbus.ObjectDefinition>;
 
   /**

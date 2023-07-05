@@ -13,9 +13,6 @@ import type { BotConfig, BotInterface } from './types';
 const wasmURL = require.resolve('@momentum-xyz/posbus-client/pbc.wasm');
 const wasmPBC = fs.readFileSync(wasmURL);
 
-type TransformNoScale = posbus.TransformNoScale;
-// type Transform = posbus.Transform;
-
 const { BACKEND_URL = 'https://dev.odyssey.ninja' } = process.env;
 const POSBUS_URL = `${BACKEND_URL}/posbus`;
 
@@ -84,7 +81,7 @@ export class Bot implements BotInterface {
     return this._isReady;
   }
 
-  moveUser(transform: TransformNoScale) {
+  moveUser(transform: posbus.TransformNoScale) {
     console.log('moveUser', transform);
     this.client.send([MsgType.MY_TRANSFORM, transform]);
   }
@@ -255,7 +252,7 @@ export class Bot implements BotInterface {
   }: {
     name: string;
     asset_3d_id: string;
-    transform?: TransformNoScale;
+    transform?: posbus.Transform;
   }) {
     const resp = await fetch(`${BACKEND_URL}/api/v4/objects`, {
       method: 'POST',
