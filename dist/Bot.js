@@ -6,7 +6,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.Bot = void 0;
 /// <reference lib="dom" />
 // ^ temp until fetch types are supported better
-require("websocket-polyfill");
+require("./polyfills");
 const posbus_client_1 = require("@momentum-xyz/posbus-client");
 const fs_1 = __importDefault(require("fs"));
 const wasmURL = require.resolve('@momentum-xyz/posbus-client/pbc.wasm');

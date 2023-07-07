@@ -1,5 +1,5 @@
 /// <reference lib="dom" />
-import 'websocket-polyfill';
+import './polyfills';
 import { posbus } from '@momentum-xyz/posbus-client';
 import type { BotConfig, BotInterface } from './types';
 export declare class Bot implements BotInterface {
