@@ -13,8 +13,7 @@ import type { BotConfig, BotInterface } from './types';
 const wasmURL = require.resolve('@momentum-xyz/posbus-client/pbc.wasm');
 const wasmPBC = fs.readFileSync(wasmURL);
 
-const { BACKEND_URL = 'https://dev.odyssey.ninja' } = process.env;
-const POSBUS_URL = `${BACKEND_URL}/posbus`;
+const { BACKEND_URL = 'https://demo.momentum.xyz' } = process.env;
 
 // TODO move to core or sdk
 const CORE_PLUGIN_ID = 'f0f0f0f0-0f0f-4ff0-af0f-f0f0f0f0f0f0';
@@ -37,7 +36,7 @@ export class Bot implements BotInterface {
     if (authToken) {
       this.authToken = authToken;
 
-      const user = await fetch(`${BACKEND_URL}/api/v4/users/me`, {
+      const user = await fetch(`${this.backendUrl}/api/v4/users/me`, {
         headers: {
           Authorization: `Bearer ${authToken}`,
         },
@@ -50,7 +49,7 @@ export class Bot implements BotInterface {
       console.log('Users/me:', user);
       this.userId = user.id;
     } else {
-      const resp = await fetch(`${BACKEND_URL}/api/v4/auth/guest-token`, {
+      const resp = await fetch(`${this.backendUrl}/api/v4/auth/guest-token`, {
         method: 'POST',
       }).then((resp) => {
         if (resp.status >= 300) {
@@ -68,8 +67,8 @@ export class Bot implements BotInterface {
       throw new Error('authToken or userId is not set');
     }
 
-    console.log('About to start connecting to', POSBUS_URL);
-    await this.client.connect(POSBUS_URL, this.authToken, this.userId);
+    console.log('About to start connecting to', this.posbusUrl);
+    await this.client.connect(this.posbusUrl, this.authToken, this.userId);
 
     console.log('Teleport to world', this.config.worldId);
     this.client.teleport(this.config.worldId);
@@ -117,7 +116,7 @@ export class Bot implements BotInterface {
     pluginId?: string;
   }) {
     const resp = await fetch(
-      `${BACKEND_URL}/api/v4/objects/${objectId}/attributes`,
+      `${this.backendUrl}/api/v4/objects/${objectId}/attributes`,
       {
         method: 'POST',
         headers: {
@@ -150,12 +149,12 @@ export class Bot implements BotInterface {
     pluginId?: string;
   }) {
     const resp = await fetch(
-      `${BACKEND_URL}/api/v4/objects/${objectId}/attributes?${new URLSearchParams(
-        {
-          plugin_id: pluginId,
-          attribute_name: name,
-        }
-      )}`,
+      `${
+        this.backendUrl
+      }/api/v4/objects/${objectId}/attributes?${new URLSearchParams({
+        plugin_id: pluginId,
+        attribute_name: name,
+      })}`,
       {
         method: 'DELETE',
         headers: {
@@ -181,12 +180,12 @@ export class Bot implements BotInterface {
     pluginId?: string;
   }) {
     const resp = await fetch(
-      `${BACKEND_URL}/api/v4/objects/${objectId}/attributes?${new URLSearchParams(
-        {
-          plugin_id: pluginId || CORE_PLUGIN_ID,
-          attribute_name: name,
-        }
-      )}`,
+      `${
+        this.backendUrl
+      }/api/v4/objects/${objectId}/attributes?${new URLSearchParams({
+        plugin_id: pluginId || CORE_PLUGIN_ID,
+        attribute_name: name,
+      })}`,
       {
         headers: {
           Authorization: `Bearer ${this.authToken}`,
@@ -254,7 +253,7 @@ export class Bot implements BotInterface {
     asset_3d_id: string;
     transform?: posbus.Transform;
   }) {
-    const resp = await fetch(`${BACKEND_URL}/api/v4/objects`, {
+    const resp = await fetch(`${this.backendUrl}/api/v4/objects`, {
       method: 'POST',
       headers: {
         Authorization: `Bearer ${this.authToken}`,
@@ -277,7 +276,7 @@ export class Bot implements BotInterface {
   }
 
   async removeObject(objectId: string) {
-    const resp = await fetch(`${BACKEND_URL}/api/v4/objects/${objectId}`, {
+    const resp = await fetch(`${this.backendUrl}/api/v4/objects/${objectId}`, {
       method: 'DELETE',
       headers: {
         Authorization: `Bearer ${this.authToken}`,
@@ -450,6 +449,13 @@ export class Bot implements BotInterface {
 
     unsafe_onRawMessage?.(event);
   };
+
+  private get backendUrl() {
+    return this.config.backendUrl || BACKEND_URL;
+  }
+  private get posbusUrl() {
+    return `${this.backendUrl}/posbus`;
+  }
 
   private config: BotConfig;
   private client: PBClient;

@@ -130,5 +130,14 @@ git push origin main --tags
 This variable is taken as base URL for websocket connection and API calls:
 
 ```
-export BACKEND_URL='https://dev.odyssey.ninja'
+export BACKEND_URL='https://demo.momentum.xyz'
+```
+
+It's also possible to pass it as as config parameter to the `Bot` constructor. Make sure you do it when deploying to production:
+
+```js
+const bot = new Bot({
+  backendUrl: 'https://demo.momentum.xyz',
+  // ...
+});
 ```
