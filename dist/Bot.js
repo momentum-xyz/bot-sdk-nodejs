@@ -11,8 +11,7 @@ const posbus_client_1 = require("@momentum-xyz/posbus-client");
 const fs_1 = __importDefault(require("fs"));
 const wasmURL = require.resolve('@momentum-xyz/posbus-client/pbc.wasm');
 const wasmPBC = fs_1.default.readFileSync(wasmURL);
-const { BACKEND_URL = 'https://dev.odyssey.ninja' } = process.env;
-const POSBUS_URL = `${BACKEND_URL}/posbus`;
+const { BACKEND_URL = 'https://demo.momentum.xyz' } = process.env;
 // TODO move to core or sdk
 const CORE_PLUGIN_ID = 'f0f0f0f0-0f0f-4ff0-af0f-f0f0f0f0f0f0';
 const CUSTOM_OBJECT_TYPE_ID = '4ed3a5bb-53f8-4511-941b-07902982c31c';
@@ -30,7 +29,7 @@ class Bot {
         console.log('Wasm loaded');
         if (authToken) {
             this.authToken = authToken;
-            const user = await fetch(`${BACKEND_URL}/api/v4/users/me`, {
+            const user = await fetch(`${this.backendUrl}/api/v4/users/me`, {
                 headers: {
                     Authorization: `Bearer ${authToken}`,
                 },
@@ -44,7 +43,7 @@ class Bot {
             this.userId = user.id;
         }
         else {
-            const resp = await fetch(`${BACKEND_URL}/api/v4/auth/guest-token`, {
+            const resp = await fetch(`${this.backendUrl}/api/v4/auth/guest-token`, {
                 method: 'POST',
             }).then((resp) => {
                 if (resp.status >= 300) {
@@ -60,8 +59,8 @@ class Bot {
         if (!this.authToken || !this.userId) {
             throw new Error('authToken or userId is not set');
         }
-        console.log('About to start connecting to', POSBUS_URL);
-        await this.client.connect(POSBUS_URL, this.authToken, this.userId);
+        console.log('About to start connecting to', this.posbusUrl);
+        await this.client.connect(this.posbusUrl, this.authToken, this.userId);
         console.log('Teleport to world', this.config.worldId);
         this.client.teleport(this.config.worldId);
     }
@@ -92,7 +91,7 @@ class Bot {
         ]);
     }
     async setObjectAttribute({ name, value, objectId, pluginId, }) {
-        const resp = await fetch(`${BACKEND_URL}/api/v4/objects/${objectId}/attributes`, {
+        const resp = await fetch(`${this.backendUrl}/api/v4/objects/${objectId}/attributes`, {
             method: 'POST',
             headers: {
                 Authorization: `Bearer ${this.authToken}`,
@@ -113,7 +112,7 @@ class Bot {
         return resp;
     }
     async removeObjectAttribute({ name, objectId, pluginId = CORE_PLUGIN_ID, }) {
-        const resp = await fetch(`${BACKEND_URL}/api/v4/objects/${objectId}/attributes?${new URLSearchParams({
+        const resp = await fetch(`${this.backendUrl}/api/v4/objects/${objectId}/attributes?${new URLSearchParams({
             plugin_id: pluginId,
             attribute_name: name,
         })}`, {
@@ -130,7 +129,7 @@ class Bot {
         return resp;
     }
     async getObjectAttribute({ name, objectId, pluginId = CORE_PLUGIN_ID, }) {
-        const resp = await fetch(`${BACKEND_URL}/api/v4/objects/${objectId}/attributes?${new URLSearchParams({
+        const resp = await fetch(`${this.backendUrl}/api/v4/objects/${objectId}/attributes?${new URLSearchParams({
             plugin_id: pluginId || CORE_PLUGIN_ID,
             attribute_name: name,
         })}`, {
@@ -174,7 +173,7 @@ class Bot {
         };
     }
     async spawnObject({ name, asset_3d_id, transform, }) {
-        const resp = await fetch(`${BACKEND_URL}/api/v4/objects`, {
+        const resp = await fetch(`${this.backendUrl}/api/v4/objects`, {
             method: 'POST',
             headers: {
                 Authorization: `Bearer ${this.authToken}`,
@@ -196,7 +195,7 @@ class Bot {
         return resp;
     }
     async removeObject(objectId) {
-        const resp = await fetch(`${BACKEND_URL}/api/v4/objects/${objectId}`, {
+        const resp = await fetch(`${this.backendUrl}/api/v4/objects/${objectId}`, {
             method: 'DELETE',
             headers: {
                 Authorization: `Bearer ${this.authToken}`,
@@ -340,6 +339,12 @@ class Bot {
         }
         unsafe_onRawMessage?.(event);
     };
+    get backendUrl() {
+        return this.config.backendUrl || BACKEND_URL;
+    }
+    get posbusUrl() {
+        return `${this.backendUrl}/posbus`;
+    }
     config;
     client;
     userId;

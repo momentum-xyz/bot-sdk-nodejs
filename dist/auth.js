@@ -4,7 +4,7 @@ exports.getAuthTokenWithMnemonicPhrase = exports.getAuthTokenWithPrivateKey = vo
 /// <reference lib="dom" />
 // ^ temp until fetch types are supported better
 const ethers_1 = require("ethers");
-const { BACKEND_URL = 'https://dev.odyssey.ninja' } = process.env;
+const { BACKEND_URL = 'https://demo.momentum.xyz' } = process.env;
 const _getAuthToken = async (wallet) => {
     const address = await wallet.getAddress();
     console.log('Get Auth token for address', address);

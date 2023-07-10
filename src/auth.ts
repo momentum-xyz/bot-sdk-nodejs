@@ -2,7 +2,7 @@
 // ^ temp until fetch types are supported better
 import { BaseWallet, Wallet } from 'ethers';
 
-const { BACKEND_URL = 'https://dev.odyssey.ninja' } = process.env;
+const { BACKEND_URL = 'https://demo.momentum.xyz' } = process.env;
 
 const _getAuthToken = async (wallet: BaseWallet) => {
   const address = await wallet.getAddress();

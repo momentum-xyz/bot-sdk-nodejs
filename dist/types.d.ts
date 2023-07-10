@@ -3,6 +3,8 @@ import type { posbus } from '@momentum-xyz/posbus-client';
 export interface BotConfig {
   worldId: string;
 
+  backendUrl?: string;
+
   onConnected?: (userId: string) => void;
   onDisconnected?: () => void;
 

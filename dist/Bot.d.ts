@@ -47,6 +47,8 @@ export declare class Bot implements BotInterface {
     }): Promise<any>;
     removeObject(objectId: string): Promise<any>;
     private handleMessage;
+    private get backendUrl();
+    private get posbusUrl();
     private config;
     private client;
     private userId;
