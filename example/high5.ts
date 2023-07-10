@@ -2,7 +2,6 @@
 import { Bot, getAuthTokenWithPrivateKey, posbus } from '../';
 import type { BotConfig } from '../dist/types';
 
-let myUserId: string | null = null;
 let objectToMoveId: string | null = null;
 let objectTransform: posbus.Transform | null = null;
 
@@ -14,8 +13,7 @@ const {
 const config: BotConfig = {
   worldId: WORLD_ID,
   onConnected: (userId) => {
-    console.log('Connected!');
-    myUserId = userId;
+    console.log('Connected! User ID:', userId);
   },
   onUserAdded: (user) => {
     console.log('User added!', user);
