@@ -1,6 +1,6 @@
 /// <reference lib="dom" />
 // ^ temp until fetch types are supported better
-import 'websocket-polyfill';
+import './polyfills';
 import {
   posbus,
   PBClient,
