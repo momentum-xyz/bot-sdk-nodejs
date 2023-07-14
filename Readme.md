@@ -8,7 +8,7 @@ This SDK allows connecting to the Odyssey platform as a user an interact with it
 
 For now the packages are only hosted on Github npm package repository.
 To use this you need to [authenticate](https://docs.github.com/en/packages/working-with-a-github-packages-registry/working-with-the-npm-registry#authenticating-to-github-packages).
-Read the Github documentation, create PAT and:
+Read the Github documentation, create PAT (make sure you include `read:packages` scope!!) and:
 
 ```shell
 npm login --scope=@momentum-xyz --auth-type=legacy --registry=https://npm.pkg.github.com
