@@ -233,9 +233,11 @@ export class Bot implements BotInterface {
     name,
     asset_3d_id,
     transform,
+    object_type_id = CUSTOM_OBJECT_TYPE_ID,
   }: {
     name: string;
     asset_3d_id: string;
+    object_type_id?: string;
     transform?: posbus.Transform;
   }) {
     const resp = await fetch(`${this.backendUrl}/api/v4/objects`, {
@@ -246,7 +248,7 @@ export class Bot implements BotInterface {
       },
       body: JSON.stringify({
         parent_id: this.config.worldId,
-        object_type_id: CUSTOM_OBJECT_TYPE_ID,
+        object_type_id,
         object_name: name,
         asset_3d_id,
         transform,
