@@ -103,12 +103,7 @@ class Bot {
                 attribute_name: name,
                 attribute_value: value,
             }),
-        }).then((resp) => {
-            if (resp.status >= 300) {
-                throw new Error('Failed to set object attribute');
-            }
-            return resp.json();
-        });
+        }).then(fetchResponseHandler);
         return resp;
     }
     async removeObjectAttribute({ name, objectId, pluginId = CORE_PLUGIN_ID, }) {
@@ -120,12 +115,7 @@ class Bot {
             headers: {
                 Authorization: `Bearer ${this.authToken}`,
             },
-        }).then((resp) => {
-            if (resp.status >= 300) {
-                throw new Error('Failed to remove object attribute');
-            }
-            return resp.json();
-        });
+        }).then(fetchResponseHandler);
         return resp;
     }
     async getObjectAttribute({ name, objectId, pluginId = CORE_PLUGIN_ID, }) {
@@ -136,12 +126,7 @@ class Bot {
             headers: {
                 Authorization: `Bearer ${this.authToken}`,
             },
-        }).then((resp) => {
-            if (resp.status >= 300) {
-                throw new Error('Failed to get object attribute');
-            }
-            return resp.json();
-        });
+        }).then(fetchResponseHandler);
         return resp;
     }
     /**
@@ -186,12 +171,7 @@ class Bot {
                 asset_3d_id,
                 transform,
             }),
-        }).then((resp) => {
-            if (resp.status >= 300) {
-                throw new Error('Failed to spawn object');
-            }
-            return resp.json();
-        });
+        }).then(fetchResponseHandler);
         return resp;
     }
     async removeObject(objectId) {
@@ -200,12 +180,7 @@ class Bot {
             headers: {
                 Authorization: `Bearer ${this.authToken}`,
             },
-        }).then((resp) => {
-            if (resp.status >= 300) {
-                throw new Error('Failed to remove object');
-            }
-            return resp.json();
-        });
+        }).then(fetchResponseHandler);
         return resp;
     }
     // ----- PRIVATE -----
@@ -354,3 +329,10 @@ class Bot {
     attributeSubscriptions = new Set();
 }
 exports.Bot = Bot;
+async function fetchResponseHandler(resp) {
+    if (resp.status >= 300) {
+        const data = await resp.json().catch(() => { });
+        throw new Error(data?.error?.message || data?.error?.reasons || resp.statusText);
+    }
+    return resp.json();
+}

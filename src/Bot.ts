@@ -130,12 +130,7 @@ export class Bot implements BotInterface {
           attribute_value: value,
         }),
       }
-    ).then((resp) => {
-      if (resp.status >= 300) {
-        throw new Error('Failed to set object attribute');
-      }
-      return resp.json();
-    });
+    ).then(fetchResponseHandler);
     return resp;
   }
 
@@ -161,12 +156,7 @@ export class Bot implements BotInterface {
           Authorization: `Bearer ${this.authToken}`,
         },
       }
-    ).then((resp) => {
-      if (resp.status >= 300) {
-        throw new Error('Failed to remove object attribute');
-      }
-      return resp.json();
-    });
+    ).then(fetchResponseHandler);
     return resp;
   }
 
@@ -191,12 +181,7 @@ export class Bot implements BotInterface {
           Authorization: `Bearer ${this.authToken}`,
         },
       }
-    ).then((resp) => {
-      if (resp.status >= 300) {
-        throw new Error('Failed to get object attribute');
-      }
-      return resp.json();
-    });
+    ).then(fetchResponseHandler);
     return resp;
   }
 
@@ -266,12 +251,7 @@ export class Bot implements BotInterface {
         asset_3d_id,
         transform,
       }),
-    }).then((resp) => {
-      if (resp.status >= 300) {
-        throw new Error('Failed to spawn object');
-      }
-      return resp.json();
-    });
+    }).then(fetchResponseHandler);
     return resp;
   }
 
@@ -281,12 +261,7 @@ export class Bot implements BotInterface {
       headers: {
         Authorization: `Bearer ${this.authToken}`,
       },
-    }).then((resp) => {
-      if (resp.status >= 300) {
-        throw new Error('Failed to remove object');
-      }
-      return resp.json();
-    });
+    }).then(fetchResponseHandler);
     return resp;
   }
 
@@ -466,4 +441,14 @@ export class Bot implements BotInterface {
   private attributeSubscriptions = new Set<
     (v: posbus.AttributeValueChanged) => void
   >();
+}
+
+async function fetchResponseHandler(resp: Response) {
+  if (resp.status >= 300) {
+    const data = await resp.json().catch(() => {});
+    throw new Error(
+      data?.error?.message || data?.error?.reasons || resp.statusText
+    );
+  }
+  return resp.json();
 }
