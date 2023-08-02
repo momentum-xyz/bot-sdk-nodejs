@@ -162,6 +162,7 @@ export class BotInterface {
    *
    * @param {Object} params - An object that contains parameters for the new object.
    * @param {string} params.name - The name of the new object.
+   * @param {string} params.object_type_id - Optional. The type of the new object. Defaults to the default object type.
    * @param {string} params.asset_3d_id - The 3D model that the new object will use.
    * @param {posbus.Transform} params.transform - Optional. The initial position and rotation of the new object.
    *                                              Current user position and rotation will be used if not specified.
@@ -169,10 +170,12 @@ export class BotInterface {
   spawnObject({
     name,
     asset_3d_id,
+    object_type_id,
     transform,
   }: {
     name: string;
     asset_3d_id: string;
+    object_type_id?: string;
     transform?: posbus.Transform;
   }): Promise<posbus.ObjectDefinition>;
 
