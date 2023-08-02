@@ -4,13 +4,20 @@ import { BaseWallet, Wallet } from 'ethers';
 
 const { BACKEND_URL = 'https://demo.momentum.xyz' } = process.env;
 
-const _getAuthToken = async (wallet: BaseWallet) => {
+export interface AuthConfig {
+  backendUrl: string;
+}
+const defaultConfig: AuthConfig = {
+  backendUrl: BACKEND_URL,
+};
+
+const _getAuthToken = async (wallet: BaseWallet, config: AuthConfig) => {
   const address = await wallet.getAddress();
 
   console.log('Get Auth token for address', address);
 
   const respChallenge = await fetch(
-    `${BACKEND_URL}/api/v4/auth/challenge?${new URLSearchParams({
+    `${config.backendUrl}/api/v4/auth/challenge?${new URLSearchParams({
       wallet: address,
     })}`
   ).then((resp) => {
@@ -23,7 +30,7 @@ const _getAuthToken = async (wallet: BaseWallet) => {
 
   console.log('Challenge signed. Fetch token');
 
-  const respToken = await fetch(`${BACKEND_URL}/api/v4/auth/token`, {
+  const respToken = await fetch(`${config.backendUrl}/api/v4/auth/token`, {
     method: 'POST',
     body: JSON.stringify({
       signedChallenge,
@@ -40,17 +47,23 @@ const _getAuthToken = async (wallet: BaseWallet) => {
   return respToken.token;
 };
 
-export const getAuthTokenWithPrivateKey = async (key: string) => {
+export const getAuthTokenWithPrivateKey = async (
+  key: string,
+  config: AuthConfig = defaultConfig
+) => {
   if (!key) throw new Error('phrase is required');
 
   const wallet = new Wallet(key);
 
-  return _getAuthToken(wallet);
+  return _getAuthToken(wallet, config);
 };
-export const getAuthTokenWithMnemonicPhrase = async (phrase: string) => {
+export const getAuthTokenWithMnemonicPhrase = async (
+  phrase: string,
+  config: AuthConfig = defaultConfig
+) => {
   if (!phrase) throw new Error('phrase is required');
 
   const wallet = Wallet.fromPhrase(phrase);
 
-  return _getAuthToken(wallet);
+  return _getAuthToken(wallet, config);
 };

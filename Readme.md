@@ -86,9 +86,13 @@ For easier start you can use one of the boilerplate projects for [Typescript](ht
 For Auth token generation there are two functions:
 
 ```ts
-const getAuthTokenWithPrivateKey = async (key: string) => {...}
+interface AuthConfig {
+  backendUrl: string;
+}
 
-const getAuthTokenWithMnemonicPhrase = async (phrase: string) => {...}
+const getAuthTokenWithPrivateKey = async (key: string, config?: AuthConfig) => {...}
+
+const getAuthTokenWithMnemonicPhrase = async (phrase: string, config?: AuthConfig) => {...}
 ```
 
 Read the comments in the [src/types.d.ts](src/types.d.ts) file describing `BotConfig` and `Bot` class.
@@ -133,9 +137,13 @@ This variable is taken as base URL for websocket connection and API calls:
 export BACKEND_URL='https://demo.momentum.xyz'
 ```
 
-It's also possible to pass it as as config parameter to the `Bot` constructor. Make sure you do it when deploying to production:
+It's also possible to pass it as as config parameter to the `Bot` constructor and auth functions. Make sure you do it when deploying to production:
 
 ```js
+getAuthTokenWithPrivateKey(privateKey, {
+  backendUrl: 'https://demo.momentum.xyz',
+});
+
 const bot = new Bot({
   backendUrl: 'https://demo.momentum.xyz',
   // ...
