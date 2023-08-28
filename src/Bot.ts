@@ -229,6 +229,15 @@ export class Bot implements BotInterface {
     };
   }
 
+  async getObjectInfo(objectId: string) {
+    const resp = await fetch(`${this.backendUrl}/api/v4/objects/${objectId}`, {
+      headers: {
+        Authorization: `Bearer ${this.authToken}`,
+      },
+    }).then(fetchResponseHandler);
+    return resp;
+  }
+
   async spawnObject({
     name,
     asset_2d_id = null,

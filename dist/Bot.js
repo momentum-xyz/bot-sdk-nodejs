@@ -157,6 +157,14 @@ class Bot {
             this.attributeSubscriptions.delete(handler);
         };
     }
+    async getObjectInfo(objectId) {
+        const resp = await fetch(`${this.backendUrl}/api/v4/objects/${objectId}`, {
+            headers: {
+                Authorization: `Bearer ${this.authToken}`,
+            },
+        }).then(fetchResponseHandler);
+        return resp;
+    }
     async spawnObject({ name, asset_2d_id = null, asset_3d_id = null, transform, object_type_id = CUSTOM_OBJECT_TYPE_ID, }) {
         const resp = await fetch(`${this.backendUrl}/api/v4/objects`, {
             method: 'POST',

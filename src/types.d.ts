@@ -158,6 +158,13 @@ export class BotInterface {
   }): () => void;
 
   /**
+   * Fetches info of a specified object.
+   *
+   * @param {string} objectId - The ID of the object to fetch info from.
+   */
+  async getObjectInfo(objectId: string): Promise<ObjectInfo>;
+
+  /**
    * Creates a new object in the virtual world.
    *
    * @param {Object} params - An object that contains parameters for the new object.
@@ -190,4 +197,13 @@ export class BotInterface {
    *
    */
   removeObject(objectId: string): Promise<null>;
+}
+
+export interface ObjectInfo {
+  owner_id: string;
+  parent_id: string;
+  object_type_id: string;
+  asset_2d_id: string | null;
+  asset_3d_id: string | null;
+  transform: posbus.Transform;
 }
