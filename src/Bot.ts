@@ -231,12 +231,14 @@ export class Bot implements BotInterface {
 
   async spawnObject({
     name,
-    asset_3d_id,
+    asset_2d_id = null,
+    asset_3d_id = null,
     transform,
     object_type_id = CUSTOM_OBJECT_TYPE_ID,
   }: {
     name: string;
-    asset_3d_id: string;
+    asset_2d_id?: string | null;
+    asset_3d_id: string | null;
     object_type_id?: string;
     transform?: posbus.Transform;
   }) {
@@ -250,6 +252,7 @@ export class Bot implements BotInterface {
         parent_id: this.config.worldId,
         object_type_id,
         object_name: name,
+        asset_2d_id,
         asset_3d_id,
         transform,
       }),

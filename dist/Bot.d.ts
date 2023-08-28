@@ -40,9 +40,10 @@ export declare class Bot implements BotInterface {
         onChange?: (value: any) => void;
         onError?: (err: Error) => void;
     }): () => void;
-    spawnObject({ name, asset_3d_id, transform, object_type_id, }: {
+    spawnObject({ name, asset_2d_id, asset_3d_id, transform, object_type_id, }: {
         name: string;
-        asset_3d_id: string;
+        asset_2d_id?: string | null;
+        asset_3d_id: string | null;
         object_type_id?: string;
         transform?: posbus.Transform;
     }): Promise<any>;

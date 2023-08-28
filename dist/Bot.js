@@ -157,7 +157,7 @@ class Bot {
             this.attributeSubscriptions.delete(handler);
         };
     }
-    async spawnObject({ name, asset_3d_id, transform, object_type_id = CUSTOM_OBJECT_TYPE_ID, }) {
+    async spawnObject({ name, asset_2d_id = null, asset_3d_id = null, transform, object_type_id = CUSTOM_OBJECT_TYPE_ID, }) {
         const resp = await fetch(`${this.backendUrl}/api/v4/objects`, {
             method: 'POST',
             headers: {
@@ -168,6 +168,7 @@ class Bot {
                 parent_id: this.config.worldId,
                 object_type_id,
                 object_name: name,
+                asset_2d_id,
                 asset_3d_id,
                 transform,
             }),

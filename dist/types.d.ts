@@ -169,12 +169,14 @@ export class BotInterface {
    */
   spawnObject({
     name,
+    asset_2d_id,
     asset_3d_id,
     object_type_id,
     transform,
   }: {
     name: string;
-    asset_3d_id: string;
+    asset_2d_id?: string | null;
+    asset_3d_id: string | null;
     object_type_id?: string;
     transform?: posbus.Transform;
   }): Promise<posbus.ObjectDefinition>;
