@@ -195,6 +195,24 @@ class Bot {
             this.attributeSubscriptions.delete(handler);
         };
     }
+    setObjectColor(objectId, color) {
+        return this.setObjectAttribute({
+            name: 'object_color',
+            value: {
+                value: color,
+            },
+            objectId,
+        });
+    }
+    setObjectName(objectId, name) {
+        return this.setObjectAttribute({
+            name: 'name',
+            value: {
+                name,
+            },
+            objectId,
+        });
+    }
     async getObjectInfo(objectId) {
         const resp = await fetch(`${this.backendUrl}/api/v4/objects/${objectId}`, {
             headers: {

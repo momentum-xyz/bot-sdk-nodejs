@@ -42,6 +42,8 @@ export declare class Bot implements BotInterface {
         onChange?: (value: any) => void;
         onError?: (err: Error) => void;
     }): () => void;
+    setObjectColor(objectId: string, color: string | null): Promise<any>;
+    setObjectName(objectId: string, name: string): Promise<any>;
     getObjectInfo(objectId: string): Promise<any>;
     spawnObject({ name, asset_2d_id, asset_3d_id, transform, object_type_id, }: {
         name: string;

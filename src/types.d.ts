@@ -173,6 +173,22 @@ export class BotInterface {
   }): () => void;
 
   /**
+   * Sets the color of a specified object.
+   * The color is specified as a hex string, e.g. '#ff0000' for red.
+   * If the color is null, the color will be cleared.
+   */
+  setObjectColor(objectId: string, color: string | null): Promise<null>;
+
+  /**
+   * Sets the name of a specified object.
+   * The name is specified as a string.
+   *
+   * @param {string} objectId - The ID of the object to set the name of.
+   * @param {string} name - The name to set.
+   */
+  setObjectName(objectId: string, name: string): Promise<null>;
+
+  /**
    * Fetches info of a specified object.
    *
    * @param {string} objectId - The ID of the object to fetch info from.

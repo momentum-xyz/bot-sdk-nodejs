@@ -269,6 +269,26 @@ export class Bot implements BotInterface {
     };
   }
 
+  setObjectColor(objectId: string, color: string | null) {
+    return this.setObjectAttribute({
+      name: 'object_color',
+      value: {
+        value: color,
+      },
+      objectId,
+    });
+  }
+
+  setObjectName(objectId: string, name: string) {
+    return this.setObjectAttribute({
+      name: 'name',
+      value: {
+        name,
+      },
+      objectId,
+    });
+  }
+
   async getObjectInfo(objectId: string) {
     const resp = await fetch(`${this.backendUrl}/api/v4/objects/${objectId}`, {
       headers: {
