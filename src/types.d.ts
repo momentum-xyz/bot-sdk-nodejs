@@ -1,4 +1,4 @@
-import type { posbus } from '@momentum-xyz/posbus-client';
+import type { PosbusEvent, posbus } from '@momentum-xyz/posbus-client';
 
 export interface BotConfig {
   worldId: string;
@@ -17,12 +17,13 @@ export interface BotConfig {
 
   onObjectAdded?(object: posbus.ObjectDefinition): void;
   onObjectMove?: (objectId: string, transform: posbus.Transform) => void;
+  onObjectData?: (objectId: string, data: posbus.ObjectData) => void;
   onObjectRemoved?: (objectId: string) => void;
 
   onHighFive?(userId: string, message?: string): void;
 
   // Not recommended to use unless you know what you're doing, subject to change
-  unsafe_onRawMessage?: (message: posbus.Message) => void;
+  unsafe_onRawMessage?: (message: PosbusEvent) => void;
 }
 
 export class BotInterface {

@@ -358,6 +358,7 @@ export class Bot implements BotInterface {
       onUserRemoved,
       onObjectAdded,
       onObjectMove,
+      onObjectData,
       onObjectRemoved,
       onHighFive,
       unsafe_onRawMessage,
@@ -414,8 +415,9 @@ export class Bot implements BotInterface {
       }
 
       case MsgType.OBJECT_DATA: {
-        // TEMP ignore
-        // console.log('PosBus set_object_data', data);
+        console.log('PosBus set_object_data', data);
+        const { id } = data;
+        onObjectData?.(id, data);
 
         // const { id, entries } = data as any;
         // if (entries?.texture) {

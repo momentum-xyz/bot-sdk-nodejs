@@ -256,7 +256,7 @@ class Bot {
             return;
         }
         const [type, data] = event.data;
-        const { onConnected, onDisconnected, onJoinedWorld, onMyPosition, onUserAdded, onUserMove, onUserRemoved, onObjectAdded, onObjectMove, onObjectRemoved, onHighFive, unsafe_onRawMessage, } = this.config;
+        const { onConnected, onDisconnected, onJoinedWorld, onMyPosition, onUserAdded, onUserMove, onUserRemoved, onObjectAdded, onObjectMove, onObjectData, onObjectRemoved, onHighFive, unsafe_onRawMessage, } = this.config;
         switch (type) {
             case posbus_client_1.MsgType.SIGNAL: {
                 const { value } = data;
@@ -305,8 +305,9 @@ class Bot {
                 break;
             }
             case posbus_client_1.MsgType.OBJECT_DATA: {
-                // TEMP ignore
-                // console.log('PosBus set_object_data', data);
+                console.log('PosBus set_object_data', data);
+                const { id } = data;
+                onObjectData?.(id, data);
                 // const { id, entries } = data as any;
                 // if (entries?.texture) {
                 //   Object.entries(entries.texture).forEach(([label, hash]: any) => {

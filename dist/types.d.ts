@@ -1,4 +1,4 @@
-import type { posbus } from '@momentum-xyz/posbus-client';
+import type { PosbusEvent, posbus } from '@momentum-xyz/posbus-client';
 
 export interface BotConfig {
   worldId: string;
@@ -17,12 +17,13 @@ export interface BotConfig {
 
   onObjectAdded?(object: posbus.ObjectDefinition): void;
   onObjectMove?: (objectId: string, transform: posbus.Transform) => void;
+  onObjectData?: (objectId: string, data: posbus.ObjectData) => void;
   onObjectRemoved?: (objectId: string) => void;
 
   onHighFive?(userId: string, message?: string): void;
 
   // Not recommended to use unless you know what you're doing, subject to change
-  unsafe_onRawMessage?: (message: posbus.Message) => void;
+  unsafe_onRawMessage?: (message: PosbusEvent) => void;
 }
 
 export class BotInterface {
@@ -56,6 +57,21 @@ export class BotInterface {
    * @param {TransformNoScale} transform - The transformation parameters to move the user. This includes position, rotation, but not scale.
    */
   moveUser(transform: posbus.TransformNoScale): void;
+
+  /**
+   * Requests a lock on an object required for tranform operation - otherwise it will be ignored.
+   * If the lock is not aquired, the function will throw an error.
+   *
+   * @param {string} objectId - The ID of the object that is being locked.
+   */
+  async requestObjectLock(objectId: string): Promise<void>;
+
+  /**
+   * Releases a lock on an object.
+   *
+   * @param {string} objectId - The ID of the object that is being unlocked.
+   */
+  requestObjectUnlock(objectId: string): void;
 
   /**
    * Transforms an object by changing its position, rotation, and/or scale.
@@ -156,6 +172,22 @@ export class BotInterface {
     onChange?: (value: any) => void;
     onError?: (err: Error) => void;
   }): () => void;
+
+  /**
+   * Sets the color of a specified object.
+   * The color is specified as a hex string, e.g. '#ff0000' for red.
+   * If the color is null, the color will be cleared.
+   */
+  setObjectColor(objectId: string, color: string | null): Promise<null>;
+
+  /**
+   * Sets the name of a specified object.
+   * The name is specified as a string.
+   *
+   * @param {string} objectId - The ID of the object to set the name of.
+   * @param {string} name - The name to set.
+   */
+  setObjectName(objectId: string, name: string): Promise<null>;
 
   /**
    * Fetches info of a specified object.
