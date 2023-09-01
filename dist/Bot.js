@@ -9,6 +9,7 @@ exports.Bot = void 0;
 require("./polyfills");
 const posbus_client_1 = require("@momentum-xyz/posbus-client");
 const fs_1 = __importDefault(require("fs"));
+const events_1 = require("events");
 const wasmURL = require.resolve('@momentum-xyz/posbus-client/pbc.wasm');
 const wasmPBC = fs_1.default.readFileSync(wasmURL);
 const { BACKEND_URL = 'https://demo.momentum.xyz' } = process.env;
@@ -73,6 +74,43 @@ class Bot {
     moveUser(transform) {
         console.log('moveUser', transform);
         this.client.send([posbus_client_1.MsgType.MY_TRANSFORM, transform]);
+    }
+    async requestObjectLock(objectId) {
+        console.log('PosBus requestObjectLock', objectId);
+        return new Promise((resolve, reject) => {
+            this.client.send([
+                posbus_client_1.MsgType.LOCK_OBJECT,
+                {
+                    id: objectId,
+                },
+            ]);
+            const onResp = (data) => {
+                const { id, lock_owner } = data;
+                console.log('PosBus lock-object-response', id, lock_owner);
+                if (id === objectId) {
+                    if (
+                    // temp ignore result to make up for the case of object locked by us and us not knowing
+                    //result &&
+                    lock_owner === this.userId) {
+                        resolve();
+                    }
+                    else {
+                        reject(new Error('Object is locked'));
+                    }
+                    this.emitterLockObjects.off('lock-object-response', onResp);
+                }
+            };
+            this.emitterLockObjects.on('lock-object-response', onResp);
+        });
+    }
+    requestObjectUnlock(objectId) {
+        console.log('PosBus requestObjectUnlock', objectId);
+        this.client.send([
+            posbus_client_1.MsgType.UNLOCK_OBJECT,
+            {
+                id: objectId,
+            },
+        ]);
     }
     transformObject(objectId, object_transform) {
         this.client.send([
@@ -293,14 +331,11 @@ class Bot {
                 }
                 break;
             }
-            // case MsgType.LOCK_OBJECT: {
-            //   console.log('Temp ignore posbus message lock_object', data);
-            //   break;
-            // }
-            // case MsgType.LOCK_OBJECT_RESPONSE: {
-            //   console.log('Temp ignore posbus message lock_object_response', data);
-            //   break;
-            // }
+            case posbus_client_1.MsgType.LOCK_OBJECT_RESPONSE: {
+                console.log('Handle posbus message lock_object_response', data);
+                this.emitterLockObjects.emit('lock-object-response', data);
+                break;
+            }
             case posbus_client_1.MsgType.HIGH_FIVE: {
                 // console.log('Handle posbus message high_five', data);
                 const { sender_id, receiver_id, message } = data;
@@ -336,6 +371,7 @@ class Bot {
     _isConnected = false;
     _isReady = false;
     attributeSubscriptions = new Set();
+    emitterLockObjects = new events_1.EventEmitter();
 }
 exports.Bot = Bot;
 async function fetchResponseHandler(resp) {

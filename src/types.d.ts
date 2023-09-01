@@ -58,6 +58,21 @@ export class BotInterface {
   moveUser(transform: posbus.TransformNoScale): void;
 
   /**
+   * Requests a lock on an object required for tranform operation - otherwise it will be ignored.
+   * If the lock is not aquired, the function will throw an error.
+   *
+   * @param {string} objectId - The ID of the object that is being locked.
+   */
+  async requestObjectLock(objectId: string): Promise<void>;
+
+  /**
+   * Releases a lock on an object.
+   *
+   * @param {string} objectId - The ID of the object that is being unlocked.
+   */
+  requestObjectUnlock(objectId: string): void;
+
+  /**
    * Transforms an object by changing its position, rotation, and/or scale.
    *
    * @param {string} objectId - The ID of the object that is being transformed.

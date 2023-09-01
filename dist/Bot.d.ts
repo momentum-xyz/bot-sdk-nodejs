@@ -8,6 +8,8 @@ export declare class Bot implements BotInterface {
     get isConnected(): boolean;
     get IsReady(): boolean;
     moveUser(transform: posbus.TransformNoScale): void;
+    requestObjectLock(objectId: string): Promise<void>;
+    requestObjectUnlock(objectId: string): void;
     transformObject(objectId: string, object_transform: posbus.Transform): void;
     sendHighFive(userId: string, message?: string): void;
     setObjectAttribute({ name, value, objectId, pluginId, }: {
@@ -59,5 +61,6 @@ export declare class Bot implements BotInterface {
     private _isConnected;
     private _isReady;
     private attributeSubscriptions;
+    private emitterLockObjects;
 }
 //# sourceMappingURL=Bot.d.ts.map

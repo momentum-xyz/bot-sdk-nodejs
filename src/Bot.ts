@@ -8,6 +8,7 @@ import {
   MsgType,
 } from '@momentum-xyz/posbus-client';
 import fs from 'fs';
+import { EventEmitter } from 'events';
 import type { BotConfig, BotInterface } from './types';
 
 const wasmURL = require.resolve('@momentum-xyz/posbus-client/pbc.wasm');
@@ -83,6 +84,45 @@ export class Bot implements BotInterface {
   moveUser(transform: posbus.TransformNoScale) {
     console.log('moveUser', transform);
     this.client.send([MsgType.MY_TRANSFORM, transform]);
+  }
+
+  async requestObjectLock(objectId: string) {
+    console.log('PosBus requestObjectLock', objectId);
+    return new Promise<void>((resolve, reject) => {
+      this.client.send([
+        MsgType.LOCK_OBJECT,
+        {
+          id: objectId,
+        },
+      ]);
+
+      const onResp = (data: posbus.LockObjectResponse) => {
+        const { id, lock_owner } = data;
+        console.log('PosBus lock-object-response', id, lock_owner);
+        if (id === objectId) {
+          if (
+            // temp ignore result to make up for the case of object locked by us and us not knowing
+            //result &&
+            lock_owner === this.userId
+          ) {
+            resolve();
+          } else {
+            reject(new Error('Object is locked'));
+          }
+          this.emitterLockObjects.off('lock-object-response', onResp);
+        }
+      };
+      this.emitterLockObjects.on('lock-object-response', onResp);
+    });
+  }
+  requestObjectUnlock(objectId: string) {
+    console.log('PosBus requestObjectUnlock', objectId);
+    this.client.send([
+      MsgType.UNLOCK_OBJECT,
+      {
+        id: objectId,
+      },
+    ]);
   }
 
   transformObject(objectId: string, object_transform: posbus.Transform) {
@@ -402,15 +442,11 @@ export class Bot implements BotInterface {
         break;
       }
 
-      // case MsgType.LOCK_OBJECT: {
-      //   console.log('Temp ignore posbus message lock_object', data);
-      //   break;
-      // }
-
-      // case MsgType.LOCK_OBJECT_RESPONSE: {
-      //   console.log('Temp ignore posbus message lock_object_response', data);
-      //   break;
-      // }
+      case MsgType.LOCK_OBJECT_RESPONSE: {
+        console.log('Handle posbus message lock_object_response', data);
+        this.emitterLockObjects.emit('lock-object-response', data);
+        break;
+      }
 
       case MsgType.HIGH_FIVE: {
         // console.log('Handle posbus message high_five', data);
@@ -455,6 +491,7 @@ export class Bot implements BotInterface {
   private attributeSubscriptions = new Set<
     (v: posbus.AttributeValueChanged) => void
   >();
+  private emitterLockObjects: EventEmitter = new EventEmitter();
 }
 
 async function fetchResponseHandler(resp: Response) {
