@@ -49,17 +49,9 @@ setInterval(() => {
     const color = Math.floor(Math.random() * 16777215).toString(16);
     console.log('color', color);
 
-    bot
-      .setObjectAttribute({
-        name: 'object_color',
-        value: {
-          value: '#' + color,
-        },
-        objectId,
-      })
-      .catch((err) => {
-        console.error('Failed to set object attribute', err);
-      });
+    bot.setObjectColor(objectId, '#' + color).catch((err) => {
+      console.error('Failed to set object color', err);
+    });
   } else {
     console.log('Spawn object...');
     bot

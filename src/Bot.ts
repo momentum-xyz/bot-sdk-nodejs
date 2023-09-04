@@ -8,7 +8,8 @@ import {
   MsgType,
 } from '@momentum-xyz/posbus-client';
 import fs from 'fs';
-import type { BotConfig, BotInterface } from './types';
+import { EventEmitter } from 'events';
+import type { Asset3d, BotConfig, BotInterface } from './types';
 
 const wasmURL = require.resolve('@momentum-xyz/posbus-client/pbc.wasm');
 const wasmPBC = fs.readFileSync(wasmURL);
@@ -83,6 +84,45 @@ export class Bot implements BotInterface {
   moveUser(transform: posbus.TransformNoScale) {
     console.log('moveUser', transform);
     this.client.send([MsgType.MY_TRANSFORM, transform]);
+  }
+
+  async requestObjectLock(objectId: string) {
+    console.log('PosBus requestObjectLock', objectId);
+    return new Promise<void>((resolve, reject) => {
+      this.client.send([
+        MsgType.LOCK_OBJECT,
+        {
+          id: objectId,
+        },
+      ]);
+
+      const onResp = (data: posbus.LockObjectResponse) => {
+        const { id, lock_owner } = data;
+        console.log('PosBus lock-object-response', id, lock_owner);
+        if (id === objectId) {
+          if (
+            // temp ignore result to make up for the case of object locked by us and us not knowing
+            //result &&
+            lock_owner === this.userId
+          ) {
+            resolve();
+          } else {
+            reject(new Error('Object is locked'));
+          }
+          this.emitterLockObjects.off('lock-object-response', onResp);
+        }
+      };
+      this.emitterLockObjects.on('lock-object-response', onResp);
+    });
+  }
+  requestObjectUnlock(objectId: string) {
+    console.log('PosBus requestObjectUnlock', objectId);
+    this.client.send([
+      MsgType.UNLOCK_OBJECT,
+      {
+        id: objectId,
+      },
+    ]);
   }
 
   transformObject(objectId: string, object_transform: posbus.Transform) {
@@ -229,14 +269,45 @@ export class Bot implements BotInterface {
     };
   }
 
+  setObjectColor(objectId: string, color: string | null) {
+    return this.setObjectAttribute({
+      name: 'object_color',
+      value: {
+        value: color,
+      },
+      objectId,
+    });
+  }
+
+  setObjectName(objectId: string, name: string) {
+    return this.setObjectAttribute({
+      name: 'name',
+      value: {
+        name,
+      },
+      objectId,
+    });
+  }
+
+  async getObjectInfo(objectId: string) {
+    const resp = await fetch(`${this.backendUrl}/api/v4/objects/${objectId}`, {
+      headers: {
+        Authorization: `Bearer ${this.authToken}`,
+      },
+    }).then(fetchResponseHandler);
+    return resp;
+  }
+
   async spawnObject({
     name,
-    asset_3d_id,
+    asset_2d_id = null,
+    asset_3d_id = null,
     transform,
     object_type_id = CUSTOM_OBJECT_TYPE_ID,
   }: {
     name: string;
-    asset_3d_id: string;
+    asset_2d_id?: string | null;
+    asset_3d_id: string | null;
     object_type_id?: string;
     transform?: posbus.Transform;
   }) {
@@ -250,6 +321,7 @@ export class Bot implements BotInterface {
         parent_id: this.config.worldId,
         object_type_id,
         object_name: name,
+        asset_2d_id,
         asset_3d_id,
         transform,
       }),
@@ -264,6 +336,20 @@ export class Bot implements BotInterface {
         Authorization: `Bearer ${this.authToken}`,
       },
     }).then(fetchResponseHandler);
+    return resp;
+  }
+
+  async getSupportedAssets3d(category: 'basic' | 'custom'): Promise<Asset3d> {
+    const resp = await fetch(
+      `${this.backendUrl}/api/v4/assets-3d?${new URLSearchParams({
+        category,
+      })}`,
+      {
+        headers: {
+          Authorization: `Bearer ${this.authToken}`,
+        },
+      }
+    ).then(fetchResponseHandler);
     return resp;
   }
 
@@ -286,6 +372,7 @@ export class Bot implements BotInterface {
       onUserRemoved,
       onObjectAdded,
       onObjectMove,
+      onObjectData,
       onObjectRemoved,
       onHighFive,
       unsafe_onRawMessage,
@@ -342,8 +429,9 @@ export class Bot implements BotInterface {
       }
 
       case MsgType.OBJECT_DATA: {
-        // TEMP ignore
-        // console.log('PosBus set_object_data', data);
+        console.log('PosBus set_object_data', data);
+        const { id } = data;
+        onObjectData?.(id, data);
 
         // const { id, entries } = data as any;
         // if (entries?.texture) {
@@ -390,15 +478,11 @@ export class Bot implements BotInterface {
         break;
       }
 
-      // case MsgType.LOCK_OBJECT: {
-      //   console.log('Temp ignore posbus message lock_object', data);
-      //   break;
-      // }
-
-      // case MsgType.LOCK_OBJECT_RESPONSE: {
-      //   console.log('Temp ignore posbus message lock_object_response', data);
-      //   break;
-      // }
+      case MsgType.LOCK_OBJECT_RESPONSE: {
+        console.log('Handle posbus message lock_object_response', data);
+        this.emitterLockObjects.emit('lock-object-response', data);
+        break;
+      }
 
       case MsgType.HIGH_FIVE: {
         // console.log('Handle posbus message high_five', data);
@@ -443,6 +527,7 @@ export class Bot implements BotInterface {
   private attributeSubscriptions = new Set<
     (v: posbus.AttributeValueChanged) => void
   >();
+  private emitterLockObjects: EventEmitter = new EventEmitter();
 }
 
 async function fetchResponseHandler(resp: Response) {
