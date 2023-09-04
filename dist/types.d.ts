@@ -229,6 +229,15 @@ export class BotInterface {
    *
    */
   removeObject(objectId: string): Promise<null>;
+
+  /**
+   * Fetches a list of supported 3D assets - Odyssey basic, Community ones and your account's private collection.
+   *
+   * @param {string} category - The category of assets to fetch. Can be 'basic' or 'custom'.
+   *
+   * @returns {Promise<any>} - Returns a promise that resolves to an array of supported assets.
+   */
+  async getSupportedAssets3d(category: 'basic' | 'custom'): Promise<Asset3d>;
 }
 
 export interface ObjectInfo {
@@ -238,4 +247,18 @@ export interface ObjectInfo {
   asset_2d_id: string | null;
   asset_3d_id: string | null;
   transform: posbus.Transform;
+}
+
+export interface Asset3d {
+  id: string;
+  user_id: string;
+  meta: {
+    category: string;
+    name: string;
+    preview_hash?: string;
+    type: number;
+  };
+  is_private: boolean;
+  createdAt: string;
+  updatedAt: string;
 }

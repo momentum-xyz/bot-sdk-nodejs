@@ -248,6 +248,16 @@ class Bot {
         }).then(fetchResponseHandler);
         return resp;
     }
+    async getSupportedAssets3d(category) {
+        const resp = await fetch(`${this.backendUrl}/api/v4/assets-3d?${new URLSearchParams({
+            category,
+        })}`, {
+            headers: {
+                Authorization: `Bearer ${this.authToken}`,
+            },
+        }).then(fetchResponseHandler);
+        return resp;
+    }
     // ----- PRIVATE -----
     handleMessage = (event) => {
         // console.log(`PosBus message [${this.userId}]:`, event.data);

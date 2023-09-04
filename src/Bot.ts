@@ -9,7 +9,7 @@ import {
 } from '@momentum-xyz/posbus-client';
 import fs from 'fs';
 import { EventEmitter } from 'events';
-import type { BotConfig, BotInterface } from './types';
+import type { Asset3d, BotConfig, BotInterface } from './types';
 
 const wasmURL = require.resolve('@momentum-xyz/posbus-client/pbc.wasm');
 const wasmPBC = fs.readFileSync(wasmURL);
@@ -336,6 +336,20 @@ export class Bot implements BotInterface {
         Authorization: `Bearer ${this.authToken}`,
       },
     }).then(fetchResponseHandler);
+    return resp;
+  }
+
+  async getSupportedAssets3d(category: 'basic' | 'custom'): Promise<Asset3d> {
+    const resp = await fetch(
+      `${this.backendUrl}/api/v4/assets-3d?${new URLSearchParams({
+        category,
+      })}`,
+      {
+        headers: {
+          Authorization: `Bearer ${this.authToken}`,
+        },
+      }
+    ).then(fetchResponseHandler);
     return resp;
   }
 

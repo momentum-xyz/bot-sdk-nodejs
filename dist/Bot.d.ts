@@ -1,7 +1,7 @@
 /// <reference lib="dom" />
 import './polyfills';
 import { posbus } from '@momentum-xyz/posbus-client';
-import type { BotConfig, BotInterface } from './types';
+import type { Asset3d, BotConfig, BotInterface } from './types';
 export declare class Bot implements BotInterface {
     constructor(config: BotConfig);
     connect(authToken?: string): Promise<void>;
@@ -53,6 +53,7 @@ export declare class Bot implements BotInterface {
         transform?: posbus.Transform;
     }): Promise<any>;
     removeObject(objectId: string): Promise<any>;
+    getSupportedAssets3d(category: 'basic' | 'custom'): Promise<Asset3d>;
     private handleMessage;
     private get backendUrl();
     private get posbusUrl();
