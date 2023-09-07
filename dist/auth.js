@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getAuthTokenWithMnemonicPhrase = exports.getAuthTokenWithPrivateKey = void 0;
+exports.getAuthTokenWithMnemonicPhrase = exports.getAuthTokenWithPrivateKey = exports.getAuthTokenWithSignature = exports.fetchAuthChallenge = void 0;
 /// <reference lib="dom" />
 // ^ temp until fetch types are supported better
 const ethers_1 = require("ethers");
@@ -8,6 +8,33 @@ const { BACKEND_URL = 'https://demo.momentum.xyz' } = process.env;
 const defaultConfig = {
     backendUrl: BACKEND_URL,
 };
+const fetchAuthChallenge = async (address, config = defaultConfig) => {
+    const resp = await fetch(`${config.backendUrl}/api/v4/auth/challenge?${new URLSearchParams({
+        wallet: address,
+    })}`).then((resp) => {
+        if (resp.status !== 200)
+            throw new Error('Failed to get challenge');
+        return resp.json();
+    });
+    return resp.challenge;
+};
+exports.fetchAuthChallenge = fetchAuthChallenge;
+const getAuthTokenWithSignature = async (signedChallenge, address, config = defaultConfig) => {
+    const resp = await fetch(`${config.backendUrl}/api/v4/auth/token`, {
+        method: 'POST',
+        body: JSON.stringify({
+            signedChallenge,
+            wallet: address,
+            network: 'ethereum',
+        }),
+    }).then((resp) => {
+        if (resp.status !== 200)
+            throw new Error('Failed to get token');
+        return resp.json();
+    });
+    return resp.token;
+};
+exports.getAuthTokenWithSignature = getAuthTokenWithSignature;
 const _getAuthToken = async (wallet, config) => {
     const address = await wallet.getAddress();
     console.log('Get Auth token for address', address);

@@ -11,6 +11,42 @@ const defaultConfig: AuthConfig = {
   backendUrl: BACKEND_URL,
 };
 
+export const fetchAuthChallenge = async (
+  address: string,
+  config: AuthConfig = defaultConfig
+) => {
+  const resp = await fetch(
+    `${config.backendUrl}/api/v4/auth/challenge?${new URLSearchParams({
+      wallet: address,
+    })}`
+  ).then((resp) => {
+    if (resp.status !== 200) throw new Error('Failed to get challenge');
+    return resp.json();
+  });
+
+  return resp.challenge;
+};
+
+export const getAuthTokenWithSignature = async (
+  signedChallenge: string,
+  address: string,
+  config: AuthConfig = defaultConfig
+) => {
+  const resp = await fetch(`${config.backendUrl}/api/v4/auth/token`, {
+    method: 'POST',
+    body: JSON.stringify({
+      signedChallenge,
+      wallet: address,
+      network: 'ethereum',
+    }),
+  }).then((resp) => {
+    if (resp.status !== 200) throw new Error('Failed to get token');
+    return resp.json();
+  });
+
+  return resp.token;
+};
+
 const _getAuthToken = async (wallet: BaseWallet, config: AuthConfig) => {
   const address = await wallet.getAddress();
 
